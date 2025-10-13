@@ -24,7 +24,19 @@
       const params = new URLSearchParams(window.location.search);
       const email = params.get('email');
       if (!email) { document.getElementById('profCard').innerText = 'No professor specified'; return; }
-      const res = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(email)}`, { headers: { 'Authorization':'Bearer ' + token } });
+      // First try the new profile-service (running on port 8083). If it's not available or returns non-OK,
+      // fall back to the existing CRUD endpoint under /admin-api so nothing breaks.
+      let res;
+      try {
+        res = await fetch(`http://localhost:8083/profiles/by-email?email=${encodeURIComponent(email)}`, { headers: { 'Authorization':'Bearer ' + token } });
+        if (!res.ok) {
+          // fallback to CRUD service
+          res = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(email)}`, { headers: { 'Authorization':'Bearer ' + token } });
+        }
+      } catch (err) {
+        // Network error connecting to profile-service; fallback
+        res = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(email)}`, { headers: { 'Authorization':'Bearer ' + token } });
+      }
       if (!res.ok) { let t='Unable to load'; try{ const j = await res.json(); if (j && j.error) t += ': ' + j.error; }catch(e){} document.getElementById('profCard').innerText = t; return; }
       const j = await res.json(); const u = j.user || {};
       const rows = [ ['Name', u.name || ''], ['Email', u.email || ''], ['Department', u.department || ''], ['Designation', u.designation || ''], ['Room', u.room || u.roomNumber || ''], ['Staff ID', u.staffId || ''], ['Location', u.location || 'Not Added'] ];

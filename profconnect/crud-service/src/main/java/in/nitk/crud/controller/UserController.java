@@ -161,4 +161,26 @@ public class UserController {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
     }
+
+    // Update location for a user identified by email. Body: { "location": "..." }
+    @PostMapping("/users/by-email/location")
+    public ResponseEntity<?> updateLocation(@RequestParam(value = "email") String email,
+                                            @RequestBody Map<String, String> body) {
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "email is required"));
+        }
+        String location = body.get("location");
+        if (location == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "location is required in body"));
+        }
+        var opt = repo.findByEmail(email);
+        if (opt.isPresent()) {
+            User u = opt.get();
+            u.setLocation(location);
+            User saved = repo.save(u);
+            return ResponseEntity.ok(Map.of("user", saved));
+        } else {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+    }
 }

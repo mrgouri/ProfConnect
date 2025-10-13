@@ -14,6 +14,21 @@
       <a href="/profile.html" class="btn btn-secondary">View Profile</a>
       <button id="logoutBtn" class="btn btn-danger ms-2">Logout</button>
     </div>
+    <div class="card mt-4" style="max-width:800px;">
+      <div class="card-body">
+        <h5 class="card-title">Professors</h5>
+        <div class="d-flex mb-2">
+          <input id="profSearch" class="form-control form-control-sm me-2" placeholder="Search by name...">
+          <select id="profSort" class="form-select form-select-sm" style="width:220px">
+            <option value="">Sort by department</option>
+            <option value="asc">Department ↑</option>
+            <option value="desc">Department ↓</option>
+          </select>
+          <button id="profRefresh" class="btn btn-sm btn-primary ms-2">Refresh</button>
+        </div>
+        <div id="profList"></div>
+      </div>
+    </div>
   </div>
   <script>
     const token = localStorage.getItem('token');
@@ -31,6 +46,57 @@
       localStorage.removeItem('token');
       window.location.href = '/';
     });
+
+    async function fetchProfessors(q) {
+      const headers = { 'Authorization': 'Bearer ' + token };
+      // Always use the search endpoint so the backend can honor role=PROFF filtering.
+      let url = `/admin-api/users/search?role=PROFF`;
+      if (q && q.trim() !== '') {
+        url += `&q=${encodeURIComponent(q)}`;
+      }
+      const res = await fetch(url, { headers });
+      if (!res.ok) return [];
+      const j = await res.json();
+      return j.users || [];
+    }
+
+    function renderProfessors(list) {
+      const sort = document.getElementById('profSort').value;
+      if (sort) {
+        list.sort((a,b) => { const da = (a.department||'').toLowerCase(); const db = (b.department||'').toLowerCase(); return sort === 'asc' ? da.localeCompare(db) : db.localeCompare(da); });
+      }
+      const container = document.getElementById('profList');
+      if (!list || list.length === 0) { container.innerHTML = '<div class="text-muted">No professors found</div>'; return; }
+      container.innerHTML = '<div class="list-group">' + list.map(p => `
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-bold">${p.name || p.email}</div>
+            <div class="text-muted small">${p.department || ''}</div>
+          </div>
+          <div>
+            <button class="btn btn-sm btn-outline-primary viewBtn" data-email="${p.email}">View</button>
+          </div>
+        </div>`).join('') + '</div>';
+
+      // wire view buttons
+      Array.from(document.getElementsByClassName('viewBtn')).forEach(b => b.addEventListener('click', (ev) => {
+        const em = ev.currentTarget.getAttribute('data-email');
+        if (em) window.location.href = `/prof-view.html?email=${encodeURIComponent(em)}`;
+      }));
+    }
+
+    async function loadProfessors() {
+      const q = document.getElementById('profSearch').value;
+      const list = await fetchProfessors(q);
+      renderProfessors(list);
+    }
+
+    document.getElementById('profRefresh').addEventListener('click', loadProfessors);
+    document.getElementById('profSort').addEventListener('change', loadProfessors);
+    document.getElementById('profSearch').addEventListener('input', () => { /* debounce could be added */ loadProfessors(); });
+
+    // initial load
+    loadProfessors();
   </script>
 </body>
 </html>

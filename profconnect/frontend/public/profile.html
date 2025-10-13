@@ -34,9 +34,12 @@
 
     async function loadProfile() {
       // prefer fetching full user details from CRUD service (users DB)
-      let email = null;
-      try { const payload = JSON.parse(atob(token.split('.')[1])); email = payload.sub || payload.email; } catch(e) {}
-      const url = email ? `/admin-api/users/by-email?email=${encodeURIComponent(email)}` : '/api/me';
+  // Allow ?email= override to view other users' profiles (e.g., from student dashboard)
+  const params = new URLSearchParams(window.location.search);
+  let email = null;
+  try { const payload = JSON.parse(atob(token.split('.')[1])); email = payload.sub || payload.email; } catch(e) {}
+  const viewEmail = params.get('email') || email;
+  const url = viewEmail ? `/admin-api/users/by-email?email=${encodeURIComponent(viewEmail)}` : '/api/me';
       const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
       if (!res.ok) {
         let errText = 'Unable to load profile';
@@ -135,8 +138,10 @@
       `;
       document.getElementById('profileCard').innerHTML = html;
 
-      // Wire up edit/save handlers if professor
-      if (locationRowIndex !== -1) {
+  // Wire up edit/save handlers if professor. Only allow editing when viewing own profile.
+  const isOwner = (() => { try { const p = JSON.parse(atob(token.split('.')[1])); const sub = p.sub || p.email; return sub && viewEmail && sub.toLowerCase() === viewEmail.toLowerCase(); } catch(e) { return false; } })();
+
+  if (locationRowIndex !== -1 && isOwner) {
         const editBtn = document.getElementById('editLocBtn');
         const saveBtn = document.getElementById('saveLocBtn');
         const cancelBtn = document.getElementById('cancelLocBtn');
@@ -144,8 +149,8 @@
         const locVal = document.getElementById('locVal');
         const locInput = document.getElementById('locInput');
 
-        editBtn && editBtn.addEventListener('click', () => { editBtn.style.display = 'none'; locEditor.style.display = 'inline-block'; });
-        cancelBtn && cancelBtn.addEventListener('click', () => { editBtn.style.display = 'inline-block'; locEditor.style.display = 'none'; locInput.value = locVal.innerText === 'Not Added' ? '' : locVal.innerText; });
+  editBtn && editBtn.addEventListener('click', () => { editBtn.style.display = 'none'; locEditor.style.display = 'inline-block'; });
+  cancelBtn && cancelBtn.addEventListener('click', () => { editBtn.style.display = 'inline-block'; locEditor.style.display = 'none'; locInput.value = locVal.innerText === 'Not Added' ? '' : locVal.innerText; });
 
         saveBtn && saveBtn.addEventListener('click', async () => {
           const newLoc = locInput.value;

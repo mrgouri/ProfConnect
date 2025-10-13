@@ -37,15 +37,54 @@ public class JwtFilter implements Filter {
                 return;
             }
             String role = jwtUtil.getRole(token);
-            // Allow non-admin users to fetch their own profile via the by-email endpoint
+            // Allow requests to fetch a user by email for viewing profiles.
+            // GET requests to /admin-api/users/by-email are allowed for any authenticated user (so students can view professors).
+            // Also allow GET requests to list/search users when the client explicitly requests only professors (role=PROFF).
             String requestPath = req.getRequestURI();
-            if (requestPath != null && requestPath.startsWith("/admin-api/users/by-email")) {
-                String requestedEmail = req.getParameter("email");
-                String subject = jwtUtil.getSubject(token);
-                if (requestedEmail != null && subject != null && requestedEmail.equalsIgnoreCase(subject)) {
-                    // allow the request through for the owner
-                    chain.doFilter(request, response);
-                    return;
+            if (requestPath != null) {
+                if (requestPath.startsWith("/admin-api/users/by-email")) {
+                    if ("GET".equalsIgnoreCase(req.getMethod())) {
+                        chain.doFilter(request, response);
+                        return;
+                    }
+                    // For POST /admin-api/users/by-email/location, only allow if subject == email (owner)
+                    if (requestPath.equals("/admin-api/users/by-email/location") && "POST".equalsIgnoreCase(req.getMethod())) {
+                        String requestedEmail = req.getParameter("email");
+                        String subject = jwtUtil.getSubject(token);
+                        if (requestedEmail != null && subject != null && requestedEmail.equalsIgnoreCase(subject)) {
+                            chain.doFilter(request, response);
+                            return;
+                        } else {
+                            res.setStatus(HttpStatus.FORBIDDEN.value());
+                            res.getWriter().write("{\"error\":\"Only the profile owner can update location\"}");
+                            return;
+                        }
+                    }
+                    // For other non-GET, keep previous owner-only allowance
+                    String requestedEmail = req.getParameter("email");
+                    String subject = jwtUtil.getSubject(token);
+                    if (requestedEmail != null && subject != null && requestedEmail.equalsIgnoreCase(subject)) {
+                        chain.doFilter(request, response);
+                        return;
+                    }
+                }
+
+                // Allow GET /admin-api/users?role=PROFF (list professors) for authenticated non-admins
+                if ("GET".equalsIgnoreCase(req.getMethod()) && requestPath.equals("/admin-api/users")) {
+                    String roleParam = req.getParameter("role");
+                    if (roleParam != null && "PROFF".equalsIgnoreCase(roleParam)) {
+                        chain.doFilter(request, response);
+                        return;
+                    }
+                }
+
+                // Allow GET /admin-api/users/search?role=PROFF for authenticated non-admins
+                if ("GET".equalsIgnoreCase(req.getMethod()) && requestPath.startsWith("/admin-api/users/search")) {
+                    String roleParam = req.getParameter("role");
+                    if (roleParam != null && "PROFF".equalsIgnoreCase(roleParam)) {
+                        chain.doFilter(request, response);
+                        return;
+                    }
                 }
             }
 

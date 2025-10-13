@@ -125,8 +125,7 @@
                                         <th>ID</th>
                                         <th>Username</th>
                                         <th>Email</th>
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
+                                        <th>Name</th>
                                         <th>Role</th>
                                         <th>Status</th>
                                         <th>Created At</th>
@@ -138,8 +137,7 @@
                                         <td th:text="${user.id}" class="text-muted small">-</td>
                                         <td th:text="${user.username}" class="fw-bold">-</td>
                                         <td th:text="${user.email}">-</td>
-                                        <td th:text="${user.firstName}">-</td>
-                                        <td th:text="${user.lastName}">-</td>
+                                        <td th:text="${user.name} ?: (${user.firstName} + ' ' + ${user.lastName})">-</td>
                                         <td>
                                             <span class="badge bg-info" th:text="${user.role}">-</span>
                                         </td>

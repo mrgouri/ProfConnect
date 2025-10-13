@@ -147,4 +147,18 @@ public class UserController {
             return ResponseEntity.ok(Map.of("users", repo.findAll()));
         }
     }
+
+    // Fetch a single user by email. Example: GET /admin-api/users/by-email?email=foo@example.com
+    @GetMapping("/users/by-email")
+    public ResponseEntity<?> getByEmail(@RequestParam(value = "email") String email) {
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "email is required"));
+        }
+        var opt = repo.findByEmail(email);
+        if (opt.isPresent()) {
+            return ResponseEntity.ok(Map.of("user", opt.get()));
+        } else {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+    }
 }

@@ -75,11 +75,9 @@ public class AuthApiController {
 
         var safe = users.stream().map(u -> {
             User copy = new User();
-            copy.setId(u.getId());
             copy.setUsername(u.getUsername());
             copy.setEmail(u.getEmail());
-            copy.setFirstName(u.getFirstName());
-            copy.setLastName(u.getLastName());
+            copy.setName(u.getName());
             copy.setRole(u.getRole());
             copy.setIsActive(u.getIsActive());
             copy.setCreatedAt(u.getCreatedAt());
@@ -143,7 +141,11 @@ public class AuthApiController {
             return ResponseEntity.badRequest().body(Map.of("error", "newPassword is required"));
         }
         try {
-            log.info("/api/change-password invoked for subject={}", subject);
+            // mask passwords in logs to avoid leaking secrets while still giving debug context
+            String maskedCurrent = (current == null || current.isEmpty()) ? "<empty>" : "<provided>";
+            String maskedNext = (next == null || next.isEmpty()) ? "<empty>" : "<provided>";
+            log.info("/api/change-password invoked for subject={} current={} new={}", subject, maskedCurrent, maskedNext);
+
             var userOpt = userRepository.findByEmail(subject);
             if (userOpt.isPresent()) {
                 User u = userOpt.get();
@@ -156,6 +158,10 @@ public class AuthApiController {
                     }
                 }
                 u.setPassword(next);
+                // update timestamp for auditing
+                try {
+                    u.setUpdatedAt(java.time.Instant.now().toString());
+                } catch (Exception ignored) {}
                 userRepository.save(u);
                 log.info("Password updated for {}", subject);
                 return ResponseEntity.ok(Map.of("message", "Password updated"));

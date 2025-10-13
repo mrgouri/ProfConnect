@@ -25,26 +25,77 @@
       window.location.href = '/';
     } else {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        document.getElementById('welcome').innerText = `Hello ${payload.sub || payload.email || ''} (ROLE: ${payload.role || ''})`;
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  document.getElementById('welcome').innerText = `Hello ${payload.sub || payload.name || payload.email || ''} `;
       } catch (e) {
         document.getElementById('welcome').innerText = 'Hello (invalid token)';
       }
     }
 
     async function loadProfile() {
-      const res = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } });
+      // prefer fetching full user details from CRUD service (users DB)
+      let email = null;
+      try { const payload = JSON.parse(atob(token.split('.')[1])); email = payload.sub || payload.email; } catch(e) {}
+      const url = email ? `/admin-api/users/by-email?email=${encodeURIComponent(email)}` : '/api/me';
+      const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
       if (!res.ok) {
-        document.getElementById('profileCard').innerText = 'Unable to load profile';
+        let errText = 'Unable to load profile';
+        try { const j = await res.json(); if (j && j.error) errText = errText + ': ' + j.error; } catch(e) {}
+        document.getElementById('profileCard').innerText = errText;
         return;
       }
       const json = await res.json();
-      const u = json.user;
+      // both endpoints return { user: ... }
+      const u = json.user || {};
+
+      // Build rows depending on role. For students show: name, email, rollNumber, batch, department, degree
+      // For professors show: name, email, department, designation, roomNumber, staffId
+      const role = (u.role || '').toString().toUpperCase();
+      const nameVal = u.name || (u.firstName ? (u.firstName + (u.lastName ? ' ' + u.lastName : '')) : '');
+
+      let rows = [
+     
+   
+        ['Name', nameVal],
+        ['Email', u.email],
+        ['Role', u.role],
+      ];
+
+      if (role.includes('STUDENT')) {
+        rows = rows.concat([
+          ['Roll Number', u.rollNumber || u.roll || ''],
+          ['Batch', u.batch || ''],
+          ['Department', u.department || ''],
+          ['Degree', u.degree || '']
+        ]);
+      } else if (role.includes('PROF') || role.includes('PROFF') || role.includes('TEACHER')) {
+        // room may be present as `room` (model) or `roomNumber` (db); show both fallbacks
+        const roomVal = u.room || u.roomNumber || '';
+        rows = rows.concat([
+          ['Department', u.department || ''],
+          ['Designation', u.designation || ''],
+          ['Room Number', roomVal],
+          ['Staff ID', u.staffId || '']
+        ]);
+      } else {
+        // generic/default fields for other roles
+        rows = rows.concat([
+          ['Department', u.department || ''],
+          ['Designation', u.designation || ''],
+          ['Active', u.isActive],
+          ['Created At', u.createdAt],
+          ['Updated At', u.updatedAt]
+        ]);
+      }
+
+      const tableRows = rows.map(r => `<tr><th style="width:160px">${r[0]}</th><td>${r[1] == null ? '' : r[1]}</td></tr>`).join('');
       const html = `
         <div class="card-body">
-          <div><strong>Name:</strong> ${u.firstName || u.username || 'N/A'}</div>
-          <div><strong>Email:</strong> ${u.email || 'N/A'}</div>
-          <div><strong>Role:</strong> ${u.role || 'N/A'}</div>
+          <table class="table table-sm">
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
         </div>
       `;
       document.getElementById('profileCard').innerHTML = html;

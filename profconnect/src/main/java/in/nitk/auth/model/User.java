@@ -18,6 +18,9 @@ public class User {
     
     @Field("password")
     private String password;
+
+    @Field("name")
+    private String name;
     
     @Field("firstName")
     private String firstName;
@@ -47,6 +50,16 @@ public class User {
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.role = role;
+        this.isActive = true;
+    }
+
+    // convenience constructor with single name field
+    public User(String username, String email, String password, String name, String role) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.name = name;
         this.role = role;
         this.isActive = true;
     }
@@ -82,6 +95,14 @@ public class User {
     
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
     
     public String getFirstName() {
@@ -138,6 +159,7 @@ public class User {
                 "id='" + id + '\'' +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", role='" + role + '\'' +

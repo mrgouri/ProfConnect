@@ -37,6 +37,18 @@ public class JwtFilter implements Filter {
                 return;
             }
             String role = jwtUtil.getRole(token);
+            // Allow non-admin users to fetch their own profile via the by-email endpoint
+            String requestPath = req.getRequestURI();
+            if (requestPath != null && requestPath.startsWith("/admin-api/users/by-email")) {
+                String requestedEmail = req.getParameter("email");
+                String subject = jwtUtil.getSubject(token);
+                if (requestedEmail != null && subject != null && requestedEmail.equalsIgnoreCase(subject)) {
+                    // allow the request through for the owner
+                    chain.doFilter(request, response);
+                    return;
+                }
+            }
+
             if (role == null || !"ADMIN".equalsIgnoreCase(role)) {
                 res.setStatus(HttpStatus.FORBIDDEN.value());
                 res.getWriter().write("{\"error\":\"Admin role required\"}");

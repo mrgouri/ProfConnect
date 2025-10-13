@@ -26,7 +26,7 @@
     } else {
       try {
   const payload = JSON.parse(atob(token.split('.')[1]));
-  document.getElementById('welcome').innerText = `Hello ${payload.sub || payload.name || payload.email || ''} `;
+  document.getElementById('welcome').innerText = `Hello ${payload.sub || ''} `;
       } catch (e) {
         document.getElementById('welcome').innerText = 'Hello (invalid token)';
       }
@@ -75,7 +75,8 @@
           ['Department', u.department || ''],
           ['Designation', u.designation || ''],
           ['Room Number', roomVal],
-          ['Staff ID', u.staffId || '']
+          ['Staff ID', u.staffId || ''],
+          ['Location', (u.location == null || u.location === '') ? 'Not Added' : u.location]
         ]);
       } else {
         // generic/default fields for other roles

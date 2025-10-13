@@ -89,7 +89,41 @@
         ]);
       }
 
-      const tableRows = rows.map(r => `<tr><th style="width:160px">${r[0]}</th><td>${r[1] == null ? '' : r[1]}</td></tr>`).join('');
+      // If professor role and location row present, add edit controls
+      let locationRowIndex = -1;
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i][0] === 'Location') { locationRowIndex = i; break; }
+      }
+
+      const tableRows = rows.map((r, idx) => {
+        if (idx === locationRowIndex) {
+          // render a span and an edit button; input hidden by default
+          const loc = r[1] == null || r[1] === '' ? 'Not Added' : r[1];
+        return `
+<tr id="locRow">
+  <th style="width:160px">${r[0]}</th>
+  <td>
+    <span id="locVal">${loc}</span>
+    <button id="editLocBtn" class="btn btn-sm btn-outline-primary ms-2">
+      <i class="bi bi-pencil-fill"></i> Edit
+    </button>
+
+    <span id="locEditor" style="display:none;" class="ms-2">
+      <input id="locInput" class="form-control form-control-sm d-inline-block" style="width:200px" value="${r[1] == null ? '' : r[1]}">
+      <button id="saveLocBtn" class="btn btn-sm btn-success ms-1">
+        <i class="bi bi-check-lg"></i> Save
+      </button>
+      <button id="cancelLocBtn" class="btn btn-sm btn-danger ms-1">
+        <i class="bi bi-x-lg"></i> Cancel
+      </button>
+    </span>
+  </td>
+</tr>`;
+
+        }
+        return `<tr><th style="width:160px">${r[0]}</th><td>${r[1] == null ? '' : r[1]}</td></tr>`;
+      }).join('');
+
       const html = `
         <div class="card-body">
           <table class="table table-sm">
@@ -100,6 +134,40 @@
         </div>
       `;
       document.getElementById('profileCard').innerHTML = html;
+
+      // Wire up edit/save handlers if professor
+      if (locationRowIndex !== -1) {
+        const editBtn = document.getElementById('editLocBtn');
+        const saveBtn = document.getElementById('saveLocBtn');
+        const cancelBtn = document.getElementById('cancelLocBtn');
+        const locEditor = document.getElementById('locEditor');
+        const locVal = document.getElementById('locVal');
+        const locInput = document.getElementById('locInput');
+
+        editBtn && editBtn.addEventListener('click', () => { editBtn.style.display = 'none'; locEditor.style.display = 'inline-block'; });
+        cancelBtn && cancelBtn.addEventListener('click', () => { editBtn.style.display = 'inline-block'; locEditor.style.display = 'none'; locInput.value = locVal.innerText === 'Not Added' ? '' : locVal.innerText; });
+
+        saveBtn && saveBtn.addEventListener('click', async () => {
+          const newLoc = locInput.value;
+          let email = null;
+          try { const payload = JSON.parse(atob(token.split('.')[1])); email = payload.sub || payload.email; } catch(e) {}
+          if (!email) { alert('Unable to determine user email from token'); return; }
+          try {
+            const resp = await fetch(`/admin-api/users/by-email/location?email=${encodeURIComponent(email)}`, { method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token }, body: JSON.stringify({ location: newLoc }) });
+            const j = await resp.json();
+            if (resp.ok) {
+              const updated = j.user;
+              locVal.innerText = updated.location || 'Not Added';
+              editBtn.style.display = 'inline-block';
+              locEditor.style.display = 'none';
+            } else {
+              alert('Failed to update location: ' + (j.error || resp.statusText));
+            }
+          } catch (err) {
+            alert('Error updating location: ' + err.message);
+          }
+        });
+      }
     }
 
     document.getElementById('changePasswordBtn').addEventListener('click', async () => {

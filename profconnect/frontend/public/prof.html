@@ -5,16 +5,490 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Professor Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary-color: #8b5cf6;
+      --accent-color: #ec4899;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --card-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ffffff;
+      min-height: 100vh;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #0f172a;
+    }
+
+    .navbar {
+      /* off-white header for professor dashboard */
+      background: rgba(248, 250, 252, 0.98) !important;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04);
+    }
+
+    /* Scoped tweaks so navbar controls remain readable on light bg */
+    .navbar .btn-outline-secondary {
+      background: transparent;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      color: #0f172a;
+    }
+
+    .navbar .btn-danger {
+      background: var(--danger-color);
+      border-color: var(--danger-color);
+      color: #fff;
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.5rem;
+      background: var(--card-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    #welcome {
+      font-size: 0.9rem;
+      color: #94a3b8 !important;
+      font-weight: 500;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #c4b5fd;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 0.5rem;
+    }
+
+    .btn-outline-secondary {
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: #e2e8f0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 12px;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-outline-secondary:hover {
+      background: rgba(148, 163, 184, 0.2);
+      border-color: rgba(148, 163, 184, 0.4);
+      color: #f1f5f9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      font-weight: 600;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-danger:hover {
+      background: var(--danger-color);
+      border-color: var(--danger-color);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeInUp {
+      from { 
+        opacity: 0; 
+        transform: translateY(40px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    .welcome-card {
+      background: rgba(248, 250, 252, 0.98); /* off-white */
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+      position: relative;
+      overflow: hidden;
+      color: #0f172a;
+    }
+
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12));
+    }
+
+    .welcome-card h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    .welcome-subtitle {
+      font-size: 1rem;
+      color: #475569;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .action-btn {
+      background: #ffffff; /* light card */
+      border: 1px solid rgba(15,23,42,0.06);
+      border-radius: 12px;
+      padding: 1rem;
+      text-decoration: none;
+      color: #0f172a;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(99,102,241,0.14), rgba(236,72,153,0.12));
+      transform: scaleX(0);
+      transition: transform 0.25s ease;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(15,23,42,0.06);
+    }
+
+    .action-btn:hover::before {
+      transform: scaleX(1);
+    }
+
+    .action-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      background: rgba(99,102,241,0.06);
+      color: #374151;
+    }
+
+    .action-icon.primary { background: rgba(99,102,241,0.08); }
+    .action-icon.secondary { background: rgba(139,92,246,0.06); }
+
+    .action-content h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      color: #f1f5f9;
+    }
+
+    .action-content p {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin: 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.25rem;
+      border: 1px solid rgba(15,23,42,0.06);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      animation: fadeIn 0.45s ease backwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 
+        0 12px 24px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(99, 102, 241, 0.2);
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: var(--card-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .feature-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      border: 1px solid rgba(15,23,42,0.06);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+    }
+
+    .feature-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #f1f5f9;
+    }
+
+    .feature-list {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: start;
+      gap: 1rem;
+      padding: 0.9rem;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid rgba(15,23,42,0.04);
+      transition: transform 0.12s ease;
+    }
+
+    .feature-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 8px 24px rgba(15,23,42,0.04);
+    }
+
+    .feature-item-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .feature-item-content h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #f1f5f9;
+    }
+
+    .feature-item-content p {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .welcome-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .welcome-card h1 {
+        font-size: 2rem;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #welcome {
+        display: none;
+      }
+
+      .action-btn {
+        padding: 1.25rem;
+      }
+    }
+
+    ::selection {
+      background: rgba(99, 102, 241, 0.3);
+      color: #f1f5f9;
+    }
+    /* Force all textual content to black for consistency/readability.
+       This is intentionally broad (uses !important) per request to make
+       all text black. If you want buttons or badges to keep their
+       original contrast, we can narrow this rule later. */
+    body, body * {
+      color: #000 !important;
+    }
+  </style>
 </head>
-<body class="p-4">
-  <div class="container">
-    <h1>Professor Dashboard</h1>
-    <p id="welcome"></p>
-    <div class="mb-2">
-      <a href="/profile.html" class="btn btn-secondary">View Profile</a>
-      <button id="logoutBtn" class="btn btn-danger ms-2">Logout</button>
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">ProfConnect</a>
+      <div class="d-flex align-items-center">
+        <span id="welcome" class="me-3"></span>
+        <a href="/profile.html" class="btn btn-outline-secondary btn-sm me-2">Profile</a>
+        <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
+      </div>
     </div>
-  </div>
+  </nav>
+
+  <main class="dashboard-container">
+    <div class="welcome-card">
+      <h1>Professor Dashboard</h1>
+      <p class="welcome-subtitle" id="welcomeSub"></p>
+      
+      <div class="quick-actions">
+        <a href="/profile.html" class="action-btn">
+          <div class="action-icon secondary">
+            ⚙️
+          </div>
+          <div class="action-content">
+            <h3>Edit Profile</h3>
+            <p>Update your information and settings</p>
+          </div>
+        </a>
+        <button id="editLocationAction" class="action-btn" style="
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+">
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+  </svg>
+  Edit Location
+</button>
+      </div>
+      <!-- Inline location editor (hidden by default) -->
+      <div id="locEditorCard" style="display:none; margin-top:1rem;">
+        <div style="display:flex; gap:0.75rem; align-items:center;">
+          <div style="flex:1;">
+            <label style="font-weight:600; display:block; margin-bottom:0.25rem;">Location</label>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+              <span id="dashLocVal" style="padding:0.5rem 0;">Not Added</span>
+              <input id="dashLocInput" class="form-control form-control-sm" style="width:320px; display:none;" value="">
+            </div>
+          </div>
+          <div>
+            <button id="dashEditBtn" class="btn btn-sm btn-outline-primary">Edit</button>
+            <button id="dashSaveBtn" class="btn btn-sm btn-success" style="display:none;">Save</button>
+            <button id="dashCancelBtn" class="btn btn-sm btn-secondary" style="display:none;">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon">📅</span>
+        <div class="stat-value">-</div>
+        <div class="stat-label">Upcoming Meetings</div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon">✓</span>
+        <div class="stat-value">-</div>
+        <div class="stat-label">Completed</div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon">👥</span>
+        <div class="stat-value">-</div>
+        <div class="stat-label">Students</div>
+      </div>
+    </div>
+
+    
+  </main>
+
   <script>
     const token = localStorage.getItem('token');
     if (!token) {
@@ -22,15 +496,105 @@
     } else {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        document.getElementById('welcome').innerText = `Hello ${payload.sub || payload.email || ''} (ROLE: ${payload.role || ''})`;
+        const userName = payload.sub || payload.email || 'Professor';
+        const userRole = payload.role || 'User';
+        
+        document.getElementById('welcome').innerHTML = `
+          Hello, ${userName}
+          <span class="role-badge">${userRole}</span>
+        `;
+        
+        document.getElementById('welcomeSub').innerHTML = `
+          Welcome back, <strong>${userName}</strong>! Manage your profile and view your public presence.
+        `;
       } catch (e) {
         document.getElementById('welcome').innerText = 'Hello (invalid token)';
+        document.getElementById('welcomeSub').innerText = 'Welcome to your dashboard';
       }
     }
+    
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('token');
       window.location.href = '/';
     });
+
+    // --- Dashboard location edit handlers ---
+    async function fetchMyProfileEmail() {
+      try {
+        const p = JSON.parse(atob(token.split('.')[1]));
+        return p.sub || p.email || null;
+      } catch (e) { return null; }
+    }
+
+    async function loadDashLocation() {
+      const email = await fetchMyProfileEmail();
+      if (!email) return;
+      try {
+        const res = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(email)}`, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!res.ok) return;
+        const j = await res.json();
+        const u = j.user || {};
+        const loc = u.location == null || u.location === '' ? 'Not Added' : u.location;
+        document.getElementById('dashLocVal').innerText = loc;
+        document.getElementById('dashLocInput').value = u.location || '';
+      } catch (err) {
+        console.error('Failed to load profile for location:', err);
+      }
+    }
+
+    document.getElementById('editLocationAction').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const card = document.getElementById('locEditorCard');
+      card.style.display = card.style.display === 'none' ? 'block' : 'none';
+      if (card.style.display === 'block') await loadDashLocation();
+    });
+
+    document.getElementById('dashEditBtn').addEventListener('click', () => {
+      document.getElementById('dashEditBtn').style.display = 'none';
+      document.getElementById('dashSaveBtn').style.display = 'inline-block';
+      document.getElementById('dashCancelBtn').style.display = 'inline-block';
+      document.getElementById('dashLocVal').style.display = 'none';
+      document.getElementById('dashLocInput').style.display = 'inline-block';
+      document.getElementById('dashLocInput').focus();
+    });
+
+    document.getElementById('dashCancelBtn').addEventListener('click', async () => {
+      document.getElementById('dashEditBtn').style.display = 'inline-block';
+      document.getElementById('dashSaveBtn').style.display = 'none';
+      document.getElementById('dashCancelBtn').style.display = 'none';
+      document.getElementById('dashLocVal').style.display = 'inline-block';
+      document.getElementById('dashLocInput').style.display = 'none';
+      await loadDashLocation();
+    });
+
+    document.getElementById('dashSaveBtn').addEventListener('click', async () => {
+      const newLoc = document.getElementById('dashLocInput').value;
+      const email = await fetchMyProfileEmail();
+      if (!email) { alert('Unable to determine email from token'); return; }
+      try {
+        const resp = await fetch(`/admin-api/users/by-email/location?email=${encodeURIComponent(email)}`, {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token },
+          body: JSON.stringify({ location: newLoc })
+        });
+        const j = await resp.json();
+        if (resp.ok) {
+          document.getElementById('dashLocVal').innerText = j.user.location || 'Not Added';
+          document.getElementById('dashEditBtn').style.display = 'inline-block';
+          document.getElementById('dashSaveBtn').style.display = 'none';
+          document.getElementById('dashCancelBtn').style.display = 'none';
+          document.getElementById('dashLocVal').style.display = 'inline-block';
+          document.getElementById('dashLocInput').style.display = 'none';
+        } else {
+          alert('Failed to update location: ' + (j.error || resp.statusText));
+        }
+      } catch (err) {
+        alert('Error updating location: ' + err.message);
+      }
+    });
+
+    // load initial location value (hidden until user opens editor)
+    loadDashLocation();
   </script>
 </body>
 </html>

@@ -126,8 +126,36 @@ public class UserController {
 
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> delete(@PathVariable String id) {
+        // find user to obtain email (so we can also remove auth record)
+        String email = null;
+        try {
+            var opt = repo.findById(id);
+            if (opt.isPresent()) email = opt.get().getEmail();
+        } catch (Exception ex) {
+            // ignore
+        }
+
         repo.deleteById(id);
-        return ResponseEntity.ok(Map.of("deleted", id));
+
+        boolean authDeleted = false;
+        // attempt to remove corresponding auth record from 'authentication.auth'
+        try {
+            if (email != null && mongoClient != null) {
+                MongoDatabase authDb = mongoClient.getDatabase("authentication");
+                MongoCollection<org.bson.Document> coll = authDb.getCollection("auth");
+                Bson filter = Filters.eq("email", email);
+                com.mongodb.client.result.DeleteResult dr = coll.deleteOne(filter);
+                authDeleted = dr != null && dr.getDeletedCount() > 0;
+            } else if (email != null && mongoTemplate != null) {
+                Query q = new Query(Criteria.where("email").is(email));
+                var res = mongoTemplate.remove(q, "auth");
+                try { authDeleted = res != null && ((com.mongodb.client.result.DeleteResult) res).getDeletedCount() > 0; } catch (Exception ex) { authDeleted = true; }
+            }
+        } catch (Exception ex) {
+            System.out.println("Warning: failed to delete auth record: " + ex.getMessage());
+        }
+
+        return ResponseEntity.ok(Map.of("deleted", id, "authDeleted", authDeleted));
     }
 
     @GetMapping("/users/search")

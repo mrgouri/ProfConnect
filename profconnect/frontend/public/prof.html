@@ -12,17 +12,38 @@
     <p id="welcome"></p>
     <div class="mb-2">
       <a href="/profile.html" class="btn btn-secondary">View Profile</a>
+      <a href="/prof-calendar.html" class="btn btn-primary">📅 Calendar Dashboard</a>
+      <a href="/calendar.html" class="btn btn-info">📋 General Calendar</a>
       <button id="logoutBtn" class="btn btn-danger ms-2">Logout</button>
+    </div>
+
+    <!-- Add this in the dashboard section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Calendar Integration</h5>
+        </div>
+        <div class="card-body">
+            <div id="calendarStatus"></div>
+            <button id="authenticateCalendar" class="btn btn-primary">
+                Connect Google Calendar
+            </button>
+            <a href="prof-calendar.html" class="btn btn-secondary">View My Calendar</a>
+        </div>
     </div>
   </div>
   <script>
+    let userEmail = null;
     const token = localStorage.getItem('token');
     if (!token) {
       window.location.href = '/';
     } else {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        document.getElementById('welcome').innerText = `Hello ${payload.sub || payload.email || ''} (ROLE: ${payload.role || ''})`;
+        userEmail = payload.sub || payload.email || null;
+        if (userEmail) {
+          localStorage.setItem('userEmail', userEmail);
+        }
+        document.getElementById('welcome').innerText = `Hello ${userEmail || ''} (ROLE: ${payload.role || ''})`;
       } catch (e) {
         document.getElementById('welcome').innerText = 'Hello (invalid token)';
       }
@@ -31,6 +52,45 @@
       localStorage.removeItem('token');
       window.location.href = '/';
     });
+
+    // Add this to your existing JavaScript
+    function checkCalendarAuth() {
+        const token = localStorage.getItem('token');
+        const email = localStorage.getItem('userEmail');
+        
+        fetch(`http://localhost:8084/calendar-api/status?email=${email}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest',
+              'Authorization': `Bearer ${token}`,
+             }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const statusDiv = document.getElementById('calendarStatus');
+            if (data.connected) {
+                statusDiv.innerHTML = '<div class="alert alert-success">Calendar Connected</div>';
+                document.getElementById('authenticateCalendar').style.display = 'none';
+            } else {
+                statusDiv.innerHTML = '<div class="alert alert-warning">Calendar Not Connected</div>';
+            }
+        });
+    }
+
+    document.getElementById('authenticateCalendar').onclick = () => {
+        const token = localStorage.getItem('token');
+        const email = localStorage.getItem('userEmail');
+        
+        fetch(`http://localhost:8084/calendar-api/auth-url?email=${email}`, {
+            headers: { 'Authorization': `Bearer ${token}`,
+              'X-Requested-With': 'XMLHttpRequest'
+             }
+        })
+        .then(res => res.json())
+        .then(data => {
+            window.location.href = data.url;
+        });
+    };
+
+    checkCalendarAuth();
   </script>
 </body>
 </html>

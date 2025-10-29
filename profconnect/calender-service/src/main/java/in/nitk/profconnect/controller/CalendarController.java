@@ -1,133 +1,65 @@
-package com.nitk.appointments.controller;
+package com.nitk.calendar.controller;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.util.store.MemoryDataStoreFactory;
-import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.model.*;
-import com.nitk.appointments.model.CalendarToken;
-import com.nitk.appointments.repository.CalendarTokenRepository;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.Events;
+import com.nitk.calendar.dto.EventRequestDto;
+import com.nitk.calendar.service.GoogleCalendarService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.*;
+import java.util.Map;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/calendar")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/calendar-api")
+@CrossOrigin(origins = "http://localhost:3001")
 public class CalendarController {
 
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private final GoogleCalendarService service;
 
-    @Value("${google.oauth.clientId}")
-    private String clientId;
-    @Value("${google.oauth.clientSecret}")
-    private String clientSecret;
-    @Value("${google.oauth.redirectUri}")
-    private String redirectUri;
-
-    private final CalendarTokenRepository tokenRepo;
-
-    public CalendarController(CalendarTokenRepository tokenRepo) {
-        this.tokenRepo = tokenRepo;
+    public CalendarController(GoogleCalendarService service) {
+        this.service = service;
     }
 
-    @GetMapping("/auth-url")
-    public Map<String, String> authUrl(@RequestParam String email) throws Exception {
-        NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport,
-                JSON_FACTORY,
-                clientId,
-                clientSecret,
-                List.of("https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.readonly")
-        ).setDataStoreFactory(new MemoryDataStoreFactory()).setAccessType("offline").build();
+    @GetMapping("/status")
+    public ResponseEntity<?> checkCalendarStatus(@RequestParam String email) {
+        boolean linked = service.isCalendarLinked(email);
+        return ResponseEntity.ok(Map.of("connected", linked));
+    }
 
-        GoogleAuthorizationCodeRequestUrl url = flow.newAuthorizationUrl()
-                .setRedirectUri(redirectUri)
-                .setState(email);
-        return Map.of("url", url.build());
+
+    @GetMapping("/auth-url")
+    public ResponseEntity<?> getAuthUrl(@RequestParam String email) throws Exception {
+        return ResponseEntity.ok(java.util.Map.of("url", service.getAuthUrl(email)));
     }
 
     @GetMapping("/oauth2/callback")
-    public ResponseEntity<?> oauthCallback(@RequestParam String code, @RequestParam String state) throws Exception {
-        String email = state; // we passed email in state
-        NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        var tokenResponse = new GoogleAuthorizationCodeTokenRequest(
-                httpTransport, JSON_FACTORY, clientId, clientSecret, code, redirectUri
-        ).execute();
-
-        long expiry = Instant.now().toEpochMilli() + (tokenResponse.getExpiresInSeconds() != null ? tokenResponse.getExpiresInSeconds() * 1000L : 0L);
-        CalendarToken token = tokenRepo.findByEmail(email).orElse(new CalendarToken());
-        token.setEmail(email);
-        token.setAccessToken(tokenResponse.getAccessToken());
-        token.setRefreshToken(tokenResponse.getRefreshToken());
-        token.setExpiryMillis(expiry);
-        tokenRepo.save(token);
-        return ResponseEntity.ok().build();
+    public void oauthCallback(@RequestParam String code, @RequestParam String state, HttpServletResponse response) throws Exception {
+        service.handleCallback(code, state);
+        response.sendRedirect("http://localhost:3001/prof-calendar.html?linked=true");
     }
 
+
     @GetMapping("/events")
-    public ResponseEntity<?> listEvents(@RequestParam String email) throws Exception {
-        Calendar service = buildService(email);
-        if (service == null) return ResponseEntity.status(401).body(Map.of("message", "Not authorized"));
-        Events events = service.events().list("primary").setMaxResults(10).setOrderBy("startTime").setSingleEvents(true)
-                .setTimeMin(new com.google.api.client.util.DateTime(System.currentTimeMillis())).execute();
-        return ResponseEntity.ok(events.getItems());
+    public ResponseEntity<?> listEvents(@RequestParam String email, @RequestParam(defaultValue = "10") int max) throws Exception {
+        List<Map<String, String>> events = service.listEvents(email, max);
+        return ResponseEntity.ok(events);
     }
 
     @PostMapping("/events")
-    public ResponseEntity<?> createEvent(@RequestParam String email, @RequestBody Map<String, String> body) throws Exception {
-        Calendar service = buildService(email);
-        if (service == null) return ResponseEntity.status(401).body(Map.of("message", "Not authorized"));
+    public ResponseEntity<?> createEvent(@RequestParam String email, @RequestBody EventRequestDto body) throws Exception {
         Event event = new Event();
-        event.setSummary(body.getOrDefault("summary", "Meeting"));
-        event.setDescription(body.getOrDefault("description", ""));
-        String startIso = body.get("start");
-        String endIso = body.get("end");
-        event.setStart(new EventDateTime().setDateTime(new com.google.api.client.util.DateTime(startIso)));
-        event.setEnd(new EventDateTime().setDateTime(new com.google.api.client.util.DateTime(endIso)));
-        Event created = service.events().insert("primary", event).execute();
+        event.setSummary(body.getSummary() != null ? body.getSummary() : "Meeting");
+        event.setDescription(body.getDescription());
+        event.setStart(new com.google.api.services.calendar.model.EventDateTime()
+                .setDateTime(new com.google.api.client.util.DateTime(body.getStart())));
+        event.setEnd(new com.google.api.services.calendar.model.EventDateTime()
+                .setDateTime(new com.google.api.client.util.DateTime(body.getEnd())));
+
+        Event created = service.createEvent(email, event);
+        if (created == null) return ResponseEntity.status(404).body(java.util.Map.of("message", "No calendar linked for " + email));
         return ResponseEntity.ok(created);
     }
-
-    private Calendar buildService(String email) throws Exception {
-        Optional<CalendarToken> opt = tokenRepo.findByEmail(email);
-        if (opt.isEmpty()) return null;
-        CalendarToken t = opt.get();
-        var httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        var credential = new com.google.api.client.auth.oauth2.Credential.Builder(com.google.api.client.auth.oauth2.BearerToken.authorizationHeaderAccessMethod())
-                .setTransport(httpTransport)
-                .setJsonFactory(JSON_FACTORY)
-                .setClientAuthentication(new com.google.api.client.auth.oauth2.ClientParametersAuthentication(clientId, clientSecret))
-                .setTokenServerUrl(new GenericUrl("https://oauth2.googleapis.com/token"))
-                .build()
-                .setAccessToken(t.getAccessToken())
-                .setRefreshToken(t.getRefreshToken());
-        if (t.getExpiryMillis() != null) credential.setExpirationTimeMilliseconds(t.getExpiryMillis());
-        // Refresh if needed and persist
-        if (credential.getExpiresInSeconds() != null && credential.getExpiresInSeconds() <= 60) {
-            if (credential.refreshToken()) {
-                t.setAccessToken(credential.getAccessToken());
-                t.setExpiryMillis(credential.getExpirationTimeMilliseconds());
-                tokenRepo.save(t);
-            }
-        }
-        return new Calendar.Builder(httpTransport, JSON_FACTORY, credential)
-                .setApplicationName("appointment-system")
-                .build();
-    }
 }
-
-

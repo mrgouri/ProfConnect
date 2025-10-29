@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: profconnect-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: profconnect
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - profconnect-network
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.auth
+    container_name: profconnect-auth
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/authentication?authSource=admin
+      JWT_SECRET: changeitchangeitchangeitchangeitchangeit
+      JWT_EXPIRATION_MS: 3600000
+    depends_on:
+      - mongodb
+    networks:
+      - profconnect-network
+
+  # CRUD Service
+  crud-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.crud
+    container_name: profconnect-crud
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/users?authSource=admin
+      JWT_SECRET: changeitchangeitchangeitchangeitchangeit
+    depends_on:
+      - mongodb
+    networks:
+      - profconnect-network
+
+  # Profile Service
+  profile-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.profile
+    container_name: profconnect-profile
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/users?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - profconnect-network
+
+  # Calendar Service
+  calendar-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.calendar
+    container_name: profconnect-calendar
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/calendar?authSource=admin
+      JWT_SECRET: changeitchangeitchangeitchangeitchangeit
+      JWT_EXPIRATION_MS: 3600000
+      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
+      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      GOOGLE_OAUTH_REDIRECT_URI: http://localhost:3001/oauth2callback
+    depends_on:
+      - mongodb
+    networks:
+      - profconnect-network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: profconnect-frontend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      BACKEND_URL: http://auth-service:8080
+      CRUD_URL: http://crud-service:8081
+      CALENDAR_URL: http://calendar-service:8084
+    depends_on:
+      - auth-service
+      - crud-service
+      - calendar-service
+    networks:
+      - profconnect-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  profconnect-network:
+    driver: bridge

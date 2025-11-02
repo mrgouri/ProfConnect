@@ -5,60 +5,300 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Profile</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    .main-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .profile-header {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+    }
+    .profile-header h1 {
+      color: #2d3748;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    .welcome-text {
+      color: #718096;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .profile-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .card-header-custom {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      font-weight: 600;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card-body-custom {
+      padding: 2rem;
+    }
+    .info-table {
+      width: 100%;
+    }
+    .info-table tr {
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .info-table tr:last-child {
+      border-bottom: none;
+    }
+    .info-table th {
+      padding: 1rem 0;
+      color: #4a5568;
+      font-weight: 600;
+      width: 180px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .info-table td {
+      padding: 1rem 0;
+      color: #2d3748;
+      font-size: 1rem;
+    }
+    .role-badge {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .role-student {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .role-professor {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .role-other {
+      background: #f3e8ff;
+      color: #6b21a8;
+    }
+    .password-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .form-control-modern {
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    .form-control-modern:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      outline: none;
+    }
+    .btn-modern {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s;
+      border: none;
+    }
+    .btn-primary-modern {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .btn-primary-modern:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    .btn-edit {
+      background: #f7fafc;
+      color: #667eea;
+      border: 2px solid #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-edit:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    .btn-save {
+      background: #10b981;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+    }
+    .btn-cancel {
+      background: #ef4444;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+    }
+    .alert-modern {
+      border-radius: 8px;
+      border: none;
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+    }
+    .spinner {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-overlay {
+      text-align: center;
+      padding: 3rem;
+      color: #718096;
+    }
+    .input-group-modern {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #a0aec0;
+    }
+    .input-with-icon {
+      padding-left: 2.75rem;
+    }
+  </style>
 </head>
-<body class="p-4">
-  <div class="container">
-    <h1>Profile</h1>
-    <p id="welcome"></p>
-    <div id="profileCard" class="card mb-3" style="max-width:600px;"></div>
-    <h4>Change password</h4>
-    <div style="max-width:400px;">
-      <input id="currentPassword" type="password" placeholder="Current password" class="form-control mb-2" />
-      <input id="newPassword" type="password" placeholder="New password" class="form-control mb-2" />
-      <button id="changePasswordBtn" class="btn btn-primary">Change password</button>
+<body>
+  <div class="main-container">
+    <div class="profile-header">
+      <h1><i class="bi bi-person-circle"></i> Profile</h1>
+      <p class="welcome-text" id="welcome">
+        <i class="bi bi-emoji-smile"></i>
+        <span>Loading...</span>
+      </p>
     </div>
-    <div id="msg" class="mt-3"></div>
+
+    <div class="profile-card">
+      <div class="card-header-custom">
+        <i class="bi bi-info-circle"></i>
+        Personal Information
+      </div>
+      <div class="card-body-custom" id="profileCard">
+        <div class="loading-overlay">
+          <div class="spinner mx-auto mb-3"></div>
+          <p>Loading your profile...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="password-card">
+      <div class="card-header-custom">
+        <i class="bi bi-shield-lock"></i>
+        Security Settings
+      </div>
+      <div class="card-body-custom">
+        <div class="input-group-modern">
+          <i class="bi bi-lock input-icon"></i>
+          <input id="currentPassword" type="password" placeholder="Current password" class="form-control-modern input-with-icon" />
+        </div>
+        <div class="input-group-modern">
+          <i class="bi bi-key input-icon"></i>
+          <input id="newPassword" type="password" placeholder="New password" class="form-control-modern input-with-icon" />
+        </div>
+        <button id="changePasswordBtn" class="btn-modern btn-primary-modern">
+          <i class="bi bi-check-circle"></i> Change Password
+        </button>
+        <div id="msg"></div>
+      </div>
+    </div>
   </div>
+
   <script>
     const token = localStorage.getItem('token');
     if (!token) {
       window.location.href = '/';
     } else {
       try {
-  const payload = JSON.parse(atob(token.split('.')[1]));
-  document.getElementById('welcome').innerText = `Hello ${payload.sub || ''} `;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        document.getElementById('welcome').innerHTML = `
+          <i class="bi bi-emoji-smile"></i>
+          <span>Hello, <strong>${payload.sub || 'User'}</strong></span>
+        `;
       } catch (e) {
-        document.getElementById('welcome').innerText = 'Hello (invalid token)';
+        document.getElementById('welcome').innerHTML = '<i class="bi bi-exclamation-triangle"></i> <span>Invalid session</span>';
       }
     }
 
     async function loadProfile() {
-      // prefer fetching full user details from CRUD service (users DB)
-  // Allow ?email= override to view other users' profiles (e.g., from student dashboard)
-  const params = new URLSearchParams(window.location.search);
-  let email = null;
-  try { const payload = JSON.parse(atob(token.split('.')[1])); email = payload.sub || payload.email; } catch(e) {}
-  const viewEmail = params.get('email') || email;
-  const url = viewEmail ? `/admin-api/users/by-email?email=${encodeURIComponent(viewEmail)}` : '/api/me';
+      const params = new URLSearchParams(window.location.search);
+      let email = null;
+      try { 
+        const payload = JSON.parse(atob(token.split('.')[1])); 
+        email = payload.sub || payload.email; 
+      } catch(e) {}
+      const viewEmail = params.get('email') || email;
+      const url = viewEmail ? `/admin-api/users/by-email?email=${encodeURIComponent(viewEmail)}` : '/api/me';
+      
       const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
       if (!res.ok) {
         let errText = 'Unable to load profile';
-        try { const j = await res.json(); if (j && j.error) errText = errText + ': ' + j.error; } catch(e) {}
-        document.getElementById('profileCard').innerText = errText;
+        try { 
+          const j = await res.json(); 
+          if (j && j.error) errText = errText + ': ' + j.error; 
+        } catch(e) {}
+        document.getElementById('profileCard').innerHTML = `
+          <div class="text-center text-danger">
+            <i class="bi bi-exclamation-circle" style="font-size: 3rem;"></i>
+            <p class="mt-3">${errText}</p>
+          </div>
+        `;
         return;
       }
+      
       const json = await res.json();
-      // both endpoints return { user: ... }
       const u = json.user || {};
-
-      // Build rows depending on role. For students show: name, email, rollNumber, batch, department, degree
-      // For professors show: name, email, department, designation, roomNumber, staffId
       const role = (u.role || '').toString().toUpperCase();
       const nameVal = u.name || (u.firstName ? (u.firstName + (u.lastName ? ' ' + u.lastName : '')) : '');
 
       let rows = [
-     
-   
         ['Name', nameVal],
         ['Email', u.email],
         ['Role', u.role],
@@ -72,7 +312,6 @@
           ['Degree', u.degree || '']
         ]);
       } else if (role.includes('PROF') || role.includes('PROFF') || role.includes('TEACHER')) {
-        // room may be present as `room` (model) or `roomNumber` (db); show both fallbacks
         const roomVal = u.room || u.roomNumber || '';
         rows = rows.concat([
           ['Department', u.department || ''],
@@ -82,7 +321,6 @@
           ['Location', (u.location == null || u.location === '') ? 'Not Added' : u.location]
         ]);
       } else {
-        // generic/default fields for other roles
         rows = rows.concat([
           ['Department', u.department || ''],
           ['Designation', u.designation || ''],
@@ -92,56 +330,61 @@
         ]);
       }
 
-      // If professor role and location row present, add edit controls
       let locationRowIndex = -1;
       for (let i = 0; i < rows.length; i++) {
         if (rows[i][0] === 'Location') { locationRowIndex = i; break; }
       }
 
       const tableRows = rows.map((r, idx) => {
-        if (idx === locationRowIndex) {
-          // render a span and an edit button; input hidden by default
-          const loc = r[1] == null || r[1] === '' ? 'Not Added' : r[1];
-        return `
-<tr id="locRow">
-  <th style="width:160px">${r[0]}</th>
-  <td>
-    <span id="locVal">${loc}</span>
-    <button id="editLocBtn" class="btn btn-sm btn-outline-primary ms-2">
-      <i class="bi bi-pencil-fill"></i> Edit
-    </button>
-
-    <span id="locEditor" style="display:none;" class="ms-2">
-      <input id="locInput" class="form-control form-control-sm d-inline-block" style="width:200px" value="${r[1] == null ? '' : r[1]}">
-      <button id="saveLocBtn" class="btn btn-sm btn-success ms-1">
-        <i class="bi bi-check-lg"></i> Save
-      </button>
-      <button id="cancelLocBtn" class="btn btn-sm btn-danger ms-1">
-        <i class="bi bi-x-lg"></i> Cancel
-      </button>
-    </span>
-  </td>
-</tr>`;
-
+        if (r[0] === 'Role') {
+          const roleClass = role.includes('STUDENT') ? 'role-student' : 
+                           role.includes('PROF') ? 'role-professor' : 'role-other';
+          return `<tr><th>${r[0]}</th><td><span class="role-badge ${roleClass}">${r[1]}</span></td></tr>`;
         }
-        return `<tr><th style="width:160px">${r[0]}</th><td>${r[1] == null ? '' : r[1]}</td></tr>`;
+        
+        if (idx === locationRowIndex) {
+          const loc = r[1] == null || r[1] === '' ? 'Not Added' : r[1];
+          return `
+            <tr id="locRow">
+              <th>${r[0]}</th>
+              <td>
+                <span id="locVal">${loc}</span>
+                <button id="editLocBtn" class="btn-edit ms-2">
+                  <i class="bi bi-pencil"></i> Edit
+                </button>
+                <span id="locEditor" style="display:none;" class="ms-2">
+                  <input id="locInput" class="form-control-modern d-inline-block" style="width:200px; padding: 0.5rem;" value="${r[1] == null ? '' : r[1]}">
+                  <button id="saveLocBtn" class="btn-save ms-1">
+                    <i class="bi bi-check-lg"></i> Save
+                  </button>
+                  <button id="cancelLocBtn" class="btn-cancel ms-1">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </span>
+              </td>
+            </tr>`;
+        }
+        return `<tr><th>${r[0]}</th><td>${r[1] == null || r[1] === '' ? '<span style="color: #a0aec0;">—</span>' : r[1]}</td></tr>`;
       }).join('');
 
       const html = `
-        <div class="card-body">
-          <table class="table table-sm">
-            <tbody>
-              ${tableRows}
-            </tbody>
-          </table>
-        </div>
+        <table class="info-table">
+          <tbody>${tableRows}</tbody>
+        </table>
       `;
       document.getElementById('profileCard').innerHTML = html;
 
-  // Wire up edit/save handlers if professor. Only allow editing when viewing own profile.
-  const isOwner = (() => { try { const p = JSON.parse(atob(token.split('.')[1])); const sub = p.sub || p.email; return sub && viewEmail && sub.toLowerCase() === viewEmail.toLowerCase(); } catch(e) { return false; } })();
+      const isOwner = (() => { 
+        try { 
+          const p = JSON.parse(atob(token.split('.')[1])); 
+          const sub = p.sub || p.email; 
+          return sub && viewEmail && sub.toLowerCase() === viewEmail.toLowerCase(); 
+        } catch(e) { 
+          return false; 
+        } 
+      })();
 
-  if (locationRowIndex !== -1 && isOwner) {
+      if (locationRowIndex !== -1 && isOwner) {
         const editBtn = document.getElementById('editLocBtn');
         const saveBtn = document.getElementById('saveLocBtn');
         const cancelBtn = document.getElementById('cancelLocBtn');
@@ -149,16 +392,35 @@
         const locVal = document.getElementById('locVal');
         const locInput = document.getElementById('locInput');
 
-  editBtn && editBtn.addEventListener('click', () => { editBtn.style.display = 'none'; locEditor.style.display = 'inline-block'; });
-  cancelBtn && cancelBtn.addEventListener('click', () => { editBtn.style.display = 'inline-block'; locEditor.style.display = 'none'; locInput.value = locVal.innerText === 'Not Added' ? '' : locVal.innerText; });
+        editBtn && editBtn.addEventListener('click', () => { 
+          editBtn.style.display = 'none'; 
+          locEditor.style.display = 'inline-block'; 
+        });
+        
+        cancelBtn && cancelBtn.addEventListener('click', () => { 
+          editBtn.style.display = 'inline-block'; 
+          locEditor.style.display = 'none'; 
+          locInput.value = locVal.innerText === 'Not Added' ? '' : locVal.innerText; 
+        });
 
         saveBtn && saveBtn.addEventListener('click', async () => {
           const newLoc = locInput.value;
           let email = null;
-          try { const payload = JSON.parse(atob(token.split('.')[1])); email = payload.sub || payload.email; } catch(e) {}
+          try { 
+            const payload = JSON.parse(atob(token.split('.')[1])); 
+            email = payload.sub || payload.email; 
+          } catch(e) {}
           if (!email) { alert('Unable to determine user email from token'); return; }
+          
           try {
-            const resp = await fetch(`/admin-api/users/by-email/location?email=${encodeURIComponent(email)}`, { method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token }, body: JSON.stringify({ location: newLoc }) });
+            const resp = await fetch(`/admin-api/users/by-email/location?email=${encodeURIComponent(email)}`, { 
+              method: 'POST', 
+              headers: { 
+                'Content-Type':'application/json', 
+                'Authorization':'Bearer ' + token 
+              }, 
+              body: JSON.stringify({ location: newLoc }) 
+            });
             const j = await resp.json();
             if (resp.ok) {
               const updated = j.user;
@@ -178,14 +440,31 @@
     document.getElementById('changePasswordBtn').addEventListener('click', async () => {
       const current = document.getElementById('currentPassword').value;
       const next = document.getElementById('newPassword').value;
-      const res = await fetch('/api/change-password', { method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token }, body: JSON.stringify({ currentPassword: current, newPassword: next }) });
+      
+      const res = await fetch('/api/change-password', { 
+        method: 'POST', 
+        headers: { 
+          'Content-Type':'application/json', 
+          'Authorization':'Bearer ' + token 
+        }, 
+        body: JSON.stringify({ currentPassword: current, newPassword: next }) 
+      });
+      
       const json = await res.json();
       if (res.ok) {
-        document.getElementById('msg').innerHTML = '<div class="alert alert-success">' + (json.message || 'Password updated') + '</div>';
+        document.getElementById('msg').innerHTML = `
+          <div class="alert alert-success alert-modern">
+            <i class="bi bi-check-circle"></i> ${json.message || 'Password updated successfully'}
+          </div>
+        `;
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
       } else {
-        document.getElementById('msg').innerHTML = '<div class="alert alert-danger">' + (json.error || 'Error') + '</div>';
+        document.getElementById('msg').innerHTML = `
+          <div class="alert alert-danger alert-modern">
+            <i class="bi bi-exclamation-circle"></i> ${json.error || 'Error updating password'}
+          </div>
+        `;
       }
     });
 

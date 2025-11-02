@@ -5,76 +5,469 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Admin Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #8b5cf6;
+      --danger: #ef4444;
+      --success: #10b981;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    body {
+      background: var(--bg-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text-primary);
+    }
+    
+    .navbar {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+      backdrop-filter: blur(10px);
+      border: none;
+      box-shadow: var(--shadow-md);
+      padding: 1rem 0;
+    }
+    
+    .navbar-brand {
+      color: white !important;
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    
+    .navbar .welcome-text {
+      color: rgba(255,255,255,0.9);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .btn-logout {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      border-radius: 8px;
+      padding: 0.5rem 1.25rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-logout:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .stats-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      color: white;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .stats-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .stats-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    
+    .stats-label {
+      font-size: 0.875rem;
+      opacity: 0.9;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .filter-section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+    
+    .form-control, .form-select {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 0.625rem 1rem;
+      transition: all 0.3s ease;
+      font-size: 0.9375rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border: none;
+      border-radius: 10px;
+      padding: 0.625rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .btn-outline-secondary {
+      border: 2px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      transform: translateY(-1px);
+    }
+    
+    .btn-success {
+      background: var(--success);
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+      background: #059669;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .main-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      transition: box-shadow 0.3s ease;
+      height: 100%;
+    }
+    
+    .main-card:hover {
+      box-shadow: var(--shadow-md);
+    }
+    
+    .card-header-custom {
+      padding: 1.5rem;
+      border-bottom: 2px solid var(--border);
+      background: linear-gradient(to bottom, rgba(99,102,241,0.05), transparent);
+    }
+    
+    .card-title-custom {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    
+    .user-card {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .user-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    
+    .user-card-field {
+      margin-bottom: 0.5rem;
+      font-size: 0.9375rem;
+    }
+    
+    .user-card-label {
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: inline-block;
+      min-width: 110px;
+    }
+    
+    .user-card-value {
+      color: var(--text-primary);
+    }
+    
+    .form-section {
+      background: linear-gradient(to bottom, rgba(99,102,241,0.03), transparent);
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; max-height: 0; }
+      to { opacity: 1; max-height: 500px; }
+    }
+    
+    .form-section h6 {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    
+    #flash {
+      animation: slideInRight 0.3s ease;
+    }
+    
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .alert {
+      border: none;
+      border-radius: 12px;
+      font-weight: 500;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .db-info {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .search-container {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    
+    .scrollable-list {
+      max-height: 600px;
+      overflow-y: auto;
+      padding: 1.5rem;
+      padding-right: 1rem;
+    }
+    
+    .scrollable-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .scrollable-list::-webkit-scrollbar-track {
+      background: var(--bg-main);
+      border-radius: 10px;
+    }
+    
+    .scrollable-list::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 10px;
+    }
+    
+    .scrollable-list::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-dark);
+    }
+    
+    .badge-role {
+      background: rgba(99,102,241,0.1);
+      color: var(--primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+  </style>
 </head>
-<body class="p-4">
-  <div class="container">
-    <h1>Admin Dashboard</h1>
-  <p id="welcome"></p>
-  <div id="dbInfo" class="mb-3" style="font-size:0.95rem;color:#555"></div>
-    <div class="mb-3 d-flex justify-content-between align-items-center">
-      <div>
-        <strong>Students:</strong> <span id="studentCount">0</span>
-        &nbsp;&nbsp;&nbsp;
-        <strong>Profs:</strong> <span id="proffCount">0</span>
-      </div>
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">🎓 ProfConnect Admin</a>
       <div class="d-flex align-items-center">
-        <input id="searchQ" placeholder="search name or email" class="form-control" style="display:inline-block;width:260px;" />
-        <button id="searchBtn" class="btn btn-primary ms-2">Search</button>
-        <button id="logoutBtn" class="btn btn-danger ms-3">Logout</button>
+        <span id="welcome" class="welcome-text me-3"></span>
+        <button id="logoutBtn" class="btn btn-logout">Logout</button>
       </div>
     </div>
-    <div id="flash" style="position:fixed;top:16px;right:16px;z-index:1000;display:none;"></div>
+  </nav>
 
-    <div class="row">
+  <main class="container my-4">
+    <div id="flash" style="position:fixed;top:80px;right:16px;z-index:1000;display:none;"></div>
+    
+    <div class="row g-3 mb-4">
       <div class="col-md-6">
-        <h4>Students</h4>
-        <div class="mb-2 d-flex">
-          <button id="toggleStudentForm" class="btn btn-outline-secondary btn-sm me-2">Show Add Student Form</button>
-          <input id="s_searchQ" placeholder="search students by name" class="form-control form-control-sm" />
-          <button id="s_searchBtn" class="btn btn-sm btn-primary ms-2">Search</button>
+        <div class="stats-card">
+          <div class="stats-label">Total Students</div>
+          <div class="stats-number" id="studentCount">0</div>
         </div>
-        <div id="studentForm" style="display:none;">
-          <h5 class="mt-2">Add Student</h5>
-          <div class="mb-2">
-            <label for="s_department" class="form-label">Department</label>
-            <input id="s_department" placeholder="department" class="form-control" />
-          </div>
-          <input id="s_email" placeholder="email" class="form-control mb-2" />
-          <input id="s_name" placeholder="full name" class="form-control mb-2" />
-          <input id="s_batch" placeholder="batch" class="form-control mb-2" />
-          <input id="s_rollNumber" placeholder="roll number" class="form-control mb-2" />
-          <input id="s_degree" placeholder="degree" class="form-control mb-2" />
-          <button id="addStudentBtn" class="btn btn-success mb-3">Add Student</button>
-        </div>
-        <div id="studentsList"></div>
       </div>
-
       <div class="col-md-6">
-        <h4>Professors</h4>
-        <div class="mb-2 d-flex">
-          <button id="toggleProffForm" class="btn btn-outline-secondary btn-sm me-2">Show Add Professor Form</button>
-          <input id="p_searchQ" placeholder="search profs by name" class="form-control form-control-sm" />
-          <button id="p_searchBtn" class="btn btn-sm btn-primary ms-2">Search</button>
+        <div class="stats-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);">
+          <div class="stats-label">Total Professors</div>
+          <div class="stats-number" id="proffCount">0</div>
         </div>
-        <div id="proffForm" style="display:none;">
-          <h5 class="mt-2">Add Professor</h5>
-          <input id="p_email" placeholder="email" class="form-control mb-2" />
-          <input id="p_name" placeholder="full name" class="form-control mb-2" />
-          <div class="mb-2">
-           
-            <input id="p_department" placeholder="department" class="form-control" />
-          </div>
-          <input id="p_designation" placeholder="designation" class="form-control mb-2" />
-          <input id="p_room" placeholder="room" class="form-control mb-2" />
-          <input id="p_staffId" placeholder="staff id" class="form-control mb-2" />
-          <input id="p_profileLink" placeholder="profile link" class="form-control mb-2" />
-          <button id="addProffBtn" class="btn btn-success mb-3">Add Professor</button>
-        </div>
-        <div id="proffsList"></div>
       </div>
     </div>
-  <hr />
-  </div>
+
+    <div class="filter-section">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold text-secondary mb-2">Department Filter</label>
+          <select id="deptFilter" class="form-select">
+            <option value="">All Departments</option>
+          </select>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label fw-semibold text-secondary mb-2">Search</label>
+          <input id="searchQ" placeholder="Search by name or email..." class="form-control" />
+        </div>
+        <div class="col-md-3">
+          <button id="searchBtn" class="btn btn-primary w-100">🔍 Search</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="dbInfo" class="db-info"></div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="main-card">
+          <div class="card-header-custom">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="card-title-custom">👨‍🎓 Students</h5>
+              <div class="search-container">
+                <input id="s_searchQ" placeholder="Search students..." class="form-control form-control-sm" style="width: 180px;" />
+                <button id="s_searchBtn" class="btn btn-sm btn-primary">Search</button>
+              </div>
+            </div>
+            <button id="toggleStudentForm" class="btn btn-outline-secondary btn-sm">+ Add Student</button>
+          </div>
+          
+          <div id="studentForm" class="form-section" style="display:none;margin:1.5rem;">
+            <h6>➕ Add New Student</h6>
+            <div class="row g-2">
+              <div class="col-12">
+                <input id="s_email" placeholder="Email address" class="form-control" />
+              </div>
+              <div class="col-md-6">
+                <input id="s_name" placeholder="Full name" class="form-control" />
+              </div>
+              <div class="col-md-6">
+                <input id="s_department" placeholder="Department" class="form-control" />
+              </div>
+              <div class="col-md-4">
+                <input id="s_batch" placeholder="Batch" class="form-control" />
+              </div>
+              <div class="col-md-4">
+                <input id="s_rollNumber" placeholder="Roll number" class="form-control" />
+              </div>
+              <div class="col-md-4">
+                <input id="s_degree" placeholder="Degree" class="form-control" />
+              </div>
+              <div class="col-12 mt-3">
+                <button id="addStudentBtn" class="btn btn-success">Add Student</button>
+              </div>
+            </div>
+          </div>
+          
+          <div id="studentsList" class="scrollable-list"></div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="main-card">
+          <div class="card-header-custom">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="card-title-custom">👨‍🏫 Professors</h5>
+              <div class="search-container">
+                <input id="p_searchQ" placeholder="Search professors..." class="form-control form-control-sm" style="width: 180px;" />
+                <button id="p_searchBtn" class="btn btn-sm btn-primary">Search</button>
+              </div>
+            </div>
+            <button id="toggleProffForm" class="btn btn-outline-secondary btn-sm">+ Add Professor</button>
+          </div>
+          
+          <div id="proffForm" class="form-section" style="display:none;margin:1.5rem;">
+            <h6>➕ Add New Professor</h6>
+            <div class="row g-2">
+              <div class="col-12">
+                <input id="p_email" placeholder="Email address" class="form-control" />
+              </div>
+              <div class="col-md-6">
+                <input id="p_name" placeholder="Full name" class="form-control" />
+              </div>
+              <div class="col-md-6">
+                <input id="p_department" placeholder="Department" class="form-control" />
+              </div>
+              <div class="col-md-6">
+                <input id="p_designation" placeholder="Designation" class="form-control" />
+              </div>
+              <div class="col-md-6">
+                <input id="p_room" placeholder="Room" class="form-control" />
+              </div>
+              <div class="col-md-6">
+                <input id="p_staffId" placeholder="Staff ID" class="form-control" />
+              </div>
+              <div class="col-md-6">
+                <input id="p_profileLink" placeholder="Profile link" class="form-control" />
+              </div>
+              <div class="col-12 mt-3">
+                <button id="addProffBtn" class="btn btn-success">Add Professor</button>
+              </div>
+            </div>
+          </div>
+          
+          <div id="proffsList" class="scrollable-list"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
   <script>
     const token = localStorage.getItem('token');
     if (!token) {
@@ -82,9 +475,9 @@
     } else {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        document.getElementById('welcome').innerText = `Hello ${payload.sub || payload.email || ''} (ROLE: ${payload.role || ''})`;
+        document.getElementById('welcome').innerText = `${payload.sub || payload.email || ''} • ${payload.role || ''}`;
       } catch (e) {
-        document.getElementById('welcome').innerText = 'Hello (invalid token)';
+        document.getElementById('welcome').innerText = 'Invalid token';
       }
     }
     document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -93,16 +486,16 @@
     });
     
     async function fetchAllUsers(q, role) {
-          const token = localStorage.getItem('token');
-          const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
-          let url = '/admin-api/users';
-          if (q && role) url = `/admin-api/users/search?q=${encodeURIComponent(q)}&role=${encodeURIComponent(role)}`;
-          else if (q) url = `/admin-api/users/search?q=${encodeURIComponent(q)}`;
-          else if (role) url = `/admin-api/users/search?role=${encodeURIComponent(role)}`;
-          const res = await fetch(url, { headers });
-          const json = await res.json();
-          return json.users || [];
-        }
+      const token = localStorage.getItem('token');
+      const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+      let url = '/admin-api/users';
+      if (q && role) url = `/admin-api/users/search?q=${encodeURIComponent(q)}&role=${encodeURIComponent(role)}`;
+      else if (q) url = `/admin-api/users/search?q=${encodeURIComponent(q)}`;
+      else if (role) url = `/admin-api/users/search?role=${encodeURIComponent(role)}`;
+      const res = await fetch(url, { headers });
+      const json = await res.json();
+      return json.users || [];
+    }
 
     async function fetchDbInfo() {
       const token = localStorage.getItem('token');
@@ -113,177 +506,217 @@
         const json = await res.json();
         const db = json.database || json.db || 'unknown';
         const count = json.count != null ? json.count : (json.sample ? json.sample.length : 'n/a');
-        document.getElementById('dbInfo').innerText = `Connected DB: ${db} — users collection count: ${count}`;
+        document.getElementById('dbInfo').innerHTML = `<strong>Database:</strong> ${db} &nbsp;•&nbsp; <strong>Total Users:</strong> ${count}`;
       } catch (e) {
-        document.getElementById('dbInfo').innerText = 'Connected DB: unavailable (check backend)';
+        document.getElementById('dbInfo').innerHTML = '<strong>Database:</strong> Unavailable (check backend)';
       }
     }
 
-    // flash helper: shows a temporary bootstrap alert in #flash
+    function populateDepartmentFilter(list) {
+      // Use a fixed, authoritative list of departments instead of
+      // populating from the DB. This ensures the dropdown contains
+      // only the allowed department options.
+      const sel = document.getElementById('deptFilter');
+      if (!sel) return;
+      const opts = [
+        { value: '', label: 'All Departments' },
+        { value: 'CSE Department', label: 'CSE Department' },
+        { value: 'IT Department', label: 'IT Department' },
+        { value: 'Civil Department', label: 'Civil Department' },
+        { value: 'Mechanical Department', label: 'Mechanical Department' },
+        { value: 'Chemical Department', label: 'Chemical Department' },
+        { value: 'Electronics Department', label: 'Electronics Department' },
+        { value: 'Electrical Department', label: 'Electrical Department' },
+        { value: 'Metallurgy Department', label: 'Metallurgy Department' },
+        { value: 'MACS Department', label: 'MACS Department' }
+      ];
+      const current = sel.value || '';
+      sel.innerHTML = '';
+      opts.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.value;
+        opt.innerText = o.label;
+        sel.appendChild(opt);
+      });
+      if (current) try { sel.value = current; } catch(e) {}
+    }
+
     function showFlash(message, type = 'success', timeout = 3000) {
       const el = document.getElementById('flash');
-      el.innerHTML = `<div class="alert alert-${type} alert-dismissible" role="alert">${message}</div>`;
+      el.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
       el.style.display = 'block';
       setTimeout(() => { el.style.display = 'none'; el.innerHTML = ''; }, timeout);
     }
 
-async function renderUsers(list) {
-  // helper to render a single card
-  function renderCard(u) {
-    const role = (u.role || '').toUpperCase();
-    const id = u.id || u._id || '';
-    const name = u.name || 'N/A';
-    const email = u.email || 'N/A';
-    const department = u.department || 'N/A';
-    if (role === 'STUDENT') {
-      return `
-      <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-          <div><strong>Name:</strong> ${name}</div>
-          <div><strong>Email:</strong> ${email}</div>
-          <div><strong>Department:</strong> ${department}</div>
-          <div><strong>Batch:</strong> ${u.batch || 'N/A'}</div>
-          <div><strong>Roll No:</strong> ${u.rollNumber || 'N/A'}</div>
-          <div><strong>Degree:</strong> ${u.degree || 'N/A'}</div>
-          <div><small><strong>Role:</strong> ${role} | <strong>ID:</strong> ${id}</small></div>
-          <button data-id="${id}" class="btn btn-sm btn-danger mt-2 deleteBtn">Delete</button>
-        </div>
-      </div>
-      `;
+    async function renderUsers(list) {
+      const deptFilterEl = document.getElementById('deptFilter');
+      const selectedDept = deptFilterEl ? (deptFilterEl.value || '').trim() : '';
+      if (selectedDept) {
+        list = (list || []).filter(u => {
+          const ud = (u.department || '').trim().toLowerCase();
+          const sd = selectedDept.toLowerCase();
+          // allow exact match or partial match either way (e.g., 'CSE' <-> 'CSE Department')
+          return ud === sd || ud.includes(sd) || sd.includes(ud);
+        });
+      }
+
+      function renderCard(u) {
+        const role = (u.role || '').toUpperCase();
+        const id = u.id || u._id || '';
+        const name = u.name || 'N/A';
+        const email = u.email || 'N/A';
+        const department = u.department || 'N/A';
+        if (role === 'STUDENT') {
+          return `
+          <div class="user-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge-role">STUDENT</span>
+              <button data-id="${id}" class="btn btn-sm btn-danger deleteBtn">Delete</button>
+            </div>
+            <div class="user-card-field"><span class="user-card-label">Name:</span> <span class="user-card-value">${name}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Email:</span> <span class="user-card-value">${email}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Department:</span> <span class="user-card-value">${department}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Batch:</span> <span class="user-card-value">${u.batch || 'N/A'}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Roll No:</span> <span class="user-card-value">${u.rollNumber || 'N/A'}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Degree:</span> <span class="user-card-value">${u.degree || 'N/A'}</span></div>
+          </div>
+          `;
+        }
+        return `
+          <div class="user-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge-role">PROFESSOR</span>
+              <button data-id="${id}" class="btn btn-sm btn-danger deleteBtn">Delete</button>
+            </div>
+            <div class="user-card-field"><span class="user-card-label">Name:</span> <span class="user-card-value">${name}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Email:</span> <span class="user-card-value">${email}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Department:</span> <span class="user-card-value">${department}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Designation:</span> <span class="user-card-value">${u.designation || 'N/A'}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Room:</span> <span class="user-card-value">${u.room || 'N/A'}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Staff ID:</span> <span class="user-card-value">${u.staffId || 'N/A'}</span></div>
+          </div>
+        `;
+      }
+
+      const students = list.filter(u => (u.role || '').toUpperCase() === 'STUDENT');
+      const proffs = list.filter(u => (u.role || '').toUpperCase() !== 'STUDENT');
+
+      document.getElementById('studentCount').innerText = students.length;
+      document.getElementById('proffCount').innerText = proffs.length;
+
+      const studentsHtml = students.map(renderCard).join('') || '<p class="text-center text-secondary mt-4">No students found</p>';
+      const proffsHtml = proffs.map(renderCard).join('') || '<p class="text-center text-secondary mt-4">No professors found</p>';
+
+      document.getElementById('studentsList').innerHTML = studentsHtml;
+      document.getElementById('proffsList').innerHTML = proffsHtml;
+
+      document.querySelectorAll('.deleteBtn').forEach(btn => {
+        btn.addEventListener('click', async (ev) => {
+          const id = ev.currentTarget.getAttribute('data-id');
+          const token = localStorage.getItem('token');
+          const headers = token
+            ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+            : { 'Content-Type': 'application/json' };
+          await fetch(`/admin-api/users/${id}`, { method: 'DELETE', headers });
+          await loadList();
+        });
+      });
     }
-    // professor or other
-    return `
-      <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-          <div><strong>Name:</strong> ${name}</div>
-          <div><strong>Email:</strong> ${email}</div>
-          <div><strong>Department:</strong> ${department}</div>
-          <div><strong>Designation:</strong> ${u.designation || 'N/A'}</div>
-          <div><strong>Room:</strong> ${u.room || 'N/A'}</div>
-          <div><strong>Staff ID:</strong> ${u.staffId || 'N/A'}</div>
-          <div><small><strong>Role:</strong> ${role} | <strong>ID:</strong> ${id}</small></div>
-          <button data-id="${id}" class="btn btn-sm btn-danger mt-2 deleteBtn">Delete</button>
-        </div>
-      </div>
-    `;
-  }
 
-  const students = list.filter(u => (u.role || '').toUpperCase() === 'STUDENT');
-  const proffs = list.filter(u => (u.role || '').toUpperCase() !== 'STUDENT');
+    function renderStudentsOnly(list) {
+      function renderCard(u) {
+        const id = u.id || u._id || '';
+        const name = u.name || 'N/A';
+        const email = u.email || 'N/A';
+        const department = u.department || 'N/A';
+        return `
+          <div class="user-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge-role">STUDENT</span>
+              <button data-id="${id}" class="btn btn-sm btn-danger deleteStudentBtn">Delete</button>
+            </div>
+            <div class="user-card-field"><span class="user-card-label">Name:</span> <span class="user-card-value">${name}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Email:</span> <span class="user-card-value">${email}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Department:</span> <span class="user-card-value">${department}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Batch:</span> <span class="user-card-value">${u.batch || 'N/A'}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Roll No:</span> <span class="user-card-value">${u.rollNumber || 'N/A'}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Degree:</span> <span class="user-card-value">${u.degree || 'N/A'}</span></div>
+          </div>
+        `;
+      }
+      const html = (list && list.length) ? list.map(renderCard).join('') : '<p class="text-center text-secondary mt-4">No students found</p>';
+      // render into the students list area and update student count
+      document.getElementById('studentsList').innerHTML = html;
+      document.getElementById('studentCount').innerText = list ? list.length : 0;
 
-  // When rendering from the full list, update both columns and counts
-  document.getElementById('studentCount').innerText = students.length;
-  document.getElementById('proffCount').innerText = proffs.length;
+      // wire delete handlers for student delete buttons
+      document.querySelectorAll('.deleteStudentBtn').forEach(btn => {
+        btn.addEventListener('click', async (ev) => {
+          const id = ev.currentTarget.getAttribute('data-id');
+          const token = localStorage.getItem('token');
+          const headers = token
+            ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+            : { 'Content-Type': 'application/json' };
+          await fetch(`/admin-api/users/${id}`, { method: 'DELETE', headers });
+          await loadList();
+        });
+      });
+    }
 
-  const studentsHtml = students.map(renderCard).join('') || '<p>No students found</p>';
-  const proffsHtml = proffs.map(renderCard).join('') || '<p>No professors found</p>';
+    function renderProffsOnly(list) {
+      function renderCard(u) {
+        const id = u.id || u._id || '';
+        const name = u.name || 'N/A';
+        const email = u.email || 'N/A';
+        const department = u.department || 'N/A';
+        return `
+          <div class="user-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge-role">PROFESSOR</span>
+              <button data-id="${id}" class="btn btn-sm btn-danger deleteProffBtn">Delete</button>
+            </div>
+            <div class="user-card-field"><span class="user-card-label">Name:</span> <span class="user-card-value">${name}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Email:</span> <span class="user-card-value">${email}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Department:</span> <span class="user-card-value">${department}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Designation:</span> <span class="user-card-value">${u.designation || 'N/A'}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Room:</span> <span class="user-card-value">${u.room || 'N/A'}</span></div>
+            <div class="user-card-field"><span class="user-card-label">Staff ID:</span> <span class="user-card-value">${u.staffId || 'N/A'}</span></div>
+          </div>
+        `;
+      }
+      const html = (list && list.length) ? list.map(renderCard).join('') : '<p class="text-center text-secondary mt-4">No professors found</p>';
+      document.getElementById('proffsList').innerHTML = html;
+      document.getElementById('proffCount').innerText = list ? list.length : 0;
 
-  document.getElementById('studentsList').innerHTML = studentsHtml;
-  document.getElementById('proffsList').innerHTML = proffsHtml;
-
-  // Delete button (rebind after HTML replacement)
-  document.querySelectorAll('.deleteBtn').forEach(btn => {
-    btn.addEventListener('click', async (ev) => {
-      const id = ev.currentTarget.getAttribute('data-id');
-      const token = localStorage.getItem('token');
-      const headers = token
-        ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
-        : { 'Content-Type': 'application/json' };
-      await fetch(`/admin-api/users/${id}`, { method: 'DELETE', headers });
-      await loadList();
-    });
-  });
-}
-
-// Render only students (used by student-specific search)
-function renderStudentsOnly(list) {
-  function renderCard(u) {
-    const id = u.id || u._id || '';
-    const name = u.name || 'N/A';
-    const email = u.email || 'N/A';
-    const department = u.department || 'N/A';
-    return `
-      <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-          <div><strong>Name:</strong> ${name}</div>
-          <div><strong>Email:</strong> ${email}</div>
-          <div><strong>Department:</strong> ${department}</div>
-          <div><strong>Batch:</strong> ${u.batch || 'N/A'}</div>
-          <div><strong>Roll No:</strong> ${u.rollNumber || 'N/A'}</div>
-          <div><strong>Degree:</strong> ${u.degree || 'N/A'}</div>
-          <div><small><strong>ID:</strong> ${id}</small></div>
-          <button data-id="${id}" class="btn btn-sm btn-danger mt-2 deleteStudentBtn">Delete</button>
-        </div>
-      </div>
-    `;
-  }
-  const html = (list && list.length) ? list.map(renderCard).join('') : '<p>No students found</p>';
-  document.getElementById('studentsList').innerHTML = html;
-  document.getElementById('studentCount').innerText = list ? list.length : 0;
-
-  document.querySelectorAll('.deleteStudentBtn').forEach(btn => {
-    btn.addEventListener('click', async (ev) => {
-      const id = ev.currentTarget.getAttribute('data-id');
-      const token = localStorage.getItem('token');
-      const headers = token
-        ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
-        : { 'Content-Type': 'application/json' };
-      await fetch(`/admin-api/users/${id}`, { method: 'DELETE', headers });
-      await loadList();
-    });
-  });
-}
-
-// Render only profs (used by prof-specific search)
-function renderProffsOnly(list) {
-  function renderCard(u) {
-    const id = u.id || u._id || '';
-    const name = u.name || 'N/A';
-    const email = u.email || 'N/A';
-    const department = u.department || 'N/A';
-    return `
-      <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-          <div><strong>Name:</strong> ${name}</div>
-          <div><strong>Email:</strong> ${email}</div>
-          <div><strong>Department:</strong> ${department}</div>
-          <div><strong>Designation:</strong> ${u.designation || 'N/A'}</div>
-          <div><strong>Room:</strong> ${u.room || 'N/A'}</div>
-          <div><small><strong>ID:</strong> ${id}</small></div>
-          <button data-id="${id}" class="btn btn-sm btn-danger mt-2 deleteProffBtn">Delete</button>
-        </div>
-      </div>
-    `;
-  }
-  const html = (list && list.length) ? list.map(renderCard).join('') : '<p>No professors found</p>';
-  document.getElementById('proffsList').innerHTML = html;
-  document.getElementById('proffCount').innerText = list ? list.length : 0;
-
-  document.querySelectorAll('.deleteProffBtn').forEach(btn => {
-    btn.addEventListener('click', async (ev) => {
-      const id = ev.currentTarget.getAttribute('data-id');
-      const token = localStorage.getItem('token');
-      const headers = token
-        ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
-        : { 'Content-Type': 'application/json' };
-      await fetch(`/admin-api/users/${id}`, { method: 'DELETE', headers });
-      await loadList();
-    });
-  });
-}
+      document.querySelectorAll('.deleteProffBtn').forEach(btn => {
+        btn.addEventListener('click', async (ev) => {
+          const id = ev.currentTarget.getAttribute('data-id');
+          const token = localStorage.getItem('token');
+          const headers = token
+            ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+            : { 'Content-Type': 'application/json' };
+          await fetch(`/admin-api/users/${id}`, { method: 'DELETE', headers });
+          await loadList();
+        });
+      });
+    }
 
     async function loadList() {
       const q = document.getElementById('searchQ').value;
       const list = await fetchAllUsers(q);
+      populateDepartmentFilter(list);
       renderUsers(list);
     }
-
+    
     document.getElementById('searchBtn').addEventListener('click', () => loadList());
+    document.getElementById('deptFilter').addEventListener('change', () => loadList());
+    
     document.getElementById('s_searchBtn').addEventListener('click', async () => {
       const q = document.getElementById('s_searchQ').value;
       const list = await fetchAllUsers(q, 'STUDENT');
       renderStudentsOnly(list);
     });
+    
     document.getElementById('p_searchBtn').addEventListener('click', async () => {
       const q = document.getElementById('p_searchQ').value;
       const list = await fetchAllUsers(q, 'PROFF');
@@ -305,21 +738,20 @@ function renderProffsOnly(list) {
       try {
         const res = await fetch('/admin-api/users', { method: 'POST', headers, body: JSON.stringify(payload) });
         if (res.ok) {
-          // reset form fields
           document.getElementById('s_email').value = '';
           document.getElementById('s_name').value = '';
           document.getElementById('s_department').value = '';
           document.getElementById('s_batch').value = '';
           document.getElementById('s_rollNumber').value = '';
           document.getElementById('s_degree').value = '';
-          showFlash('Student successfully added', 'success');
+          showFlash('✅ Student successfully added', 'success');
           await loadList();
         } else {
           const text = await res.text();
-          showFlash('Failed to add student: ' + text, 'danger');
+          showFlash('❌ Failed to add student: ' + text, 'danger');
         }
       } catch (e) {
-        showFlash('Failed to add student: ' + (e.message || e), 'danger');
+        showFlash('❌ Failed to add student: ' + (e.message || e), 'danger');
       }
     });
 
@@ -339,7 +771,6 @@ function renderProffsOnly(list) {
       try {
         const res = await fetch('/admin-api/users', { method: 'POST', headers, body: JSON.stringify(payload) });
         if (res.ok) {
-          // reset prof form fields
           document.getElementById('p_email').value = '';
           document.getElementById('p_name').value = '';
           document.getElementById('p_department').value = '';
@@ -347,33 +778,34 @@ function renderProffsOnly(list) {
           document.getElementById('p_room').value = '';
           document.getElementById('p_staffId').value = '';
           document.getElementById('p_profileLink').value = '';
-          showFlash('Professor successfully added', 'success');
+          showFlash('✅ Professor successfully added', 'success');
           await loadList();
         } else {
           const text = await res.text();
-          showFlash('Failed to add professor: ' + text, 'danger');
+          showFlash('❌ Failed to add professor: ' + text, 'danger');
         }
       } catch (e) {
-        showFlash('Failed to add professor: ' + (e.message || e), 'danger');
+        showFlash('❌ Failed to add professor: ' + (e.message || e), 'danger');
       }
     });
 
-    // toggle form handlers
     document.getElementById('toggleStudentForm').addEventListener('click', () => {
       const el = document.getElementById('studentForm');
       const shown = el.style.display !== 'none';
       el.style.display = shown ? 'none' : 'block';
-      document.getElementById('toggleStudentForm').innerText = shown ? 'Show Add Student Form' : 'Hide Add Student Form';
+      document.getElementById('toggleStudentForm').innerText = shown ? '+ Add Student' : '− Hide Form';
     });
+    
     document.getElementById('toggleProffForm').addEventListener('click', () => {
       const el = document.getElementById('proffForm');
       const shown = el.style.display !== 'none';
       el.style.display = shown ? 'none' : 'block';
-      document.getElementById('toggleProffForm').innerText = shown ? 'Show Add Professor Form' : 'Hide Add Professor Form';
+      document.getElementById('toggleProffForm').innerText = shown ? '+ Add Professor' : '− Hide Form';
     });
 
-    // initial load
+    // Initial load
     loadList();
+    fetchDbInfo();
   </script>
 </body>
 </html>

@@ -5,6 +5,258 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Student Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --primary-dark: #4338ca;
+      --secondary-color: #0ea5e9;
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .navbar {
+      background: white !important;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      padding: 1rem 0;
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      background: var(--bg-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    #welcome {
+      font-size: 0.9rem;
+      color: #64748b !important;
+      font-weight: 500;
+    }
+
+    .btn-outline-secondary {
+      border-color: #e2e8f0;
+      color: #64748b;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #475569;
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    .main-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      border: none;
+      overflow: hidden;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-bar {
+      position: relative;
+    }
+
+    .search-bar input {
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      padding: 0.65rem 1rem;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      outline: none;
+    }
+
+    .form-select {
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      padding: 0.65rem 1rem;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      outline: none;
+    }
+
+    .btn-primary {
+      background: var(--bg-gradient);
+      border: none;
+      border-radius: 12px;
+      padding: 0.65rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+    }
+
+    .professor-card {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .professor-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--bg-gradient);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .professor-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--card-shadow-hover);
+      border-color: transparent;
+    }
+
+    .professor-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .professor-card .card-body {
+      padding: 1.5rem;
+    }
+
+    .professor-card h6 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+
+    .professor-card .department {
+      color: #64748b;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: #f1f5f9;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+
+    .professor-card .designation-badge {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      color: #0369a1;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-outline-primary {
+      border: 2px solid var(--primary-color);
+      color: var(--primary-color);
+      border-radius: 10px;
+      padding: 0.5rem 1.25rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+      background: var(--bg-gradient);
+      border-color: transparent;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+
+    .no-results svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .card-title {
+        font-size: 1.25rem;
+      }
+      
+      .navbar-brand {
+        font-size: 1.25rem;
+      }
+      
+      #welcome {
+        display: none;
+      }
+    }
+  </style>
 </head>
 <body class="p-4">
   <div class="container">
@@ -28,9 +280,55 @@
           <button id="profRefresh" class="btn btn-sm btn-primary ms-2">Refresh</button>
         </div>
         <div id="profList"></div>
+<body>
+  <nav class="navbar navbar-expand-lg shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">ProfConnect</a>
+      <div class="d-flex align-items-center">
+        <span id="welcome" class="me-3"></span>
+        <a href="/profile.html" class="btn btn-outline-secondary btn-sm me-2">Profile</a>
+        <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
       </div>
     </div>
-  </div>
+  </nav>
+
+  <main class="container my-4">
+    <div class="row">
+      <div class="col-12">
+        <div class="card main-card">
+          <div class="card-body">
+            <h5 class="card-title">Discover Professors</h5>
+            <div class="row g-3 align-items-center mb-4">
+              <div class="col-sm-12 col-md-5 search-bar">
+                <input id="profSearch" class="form-control" placeholder="🔍 Search by name or department...">
+              </div>
+              <div class="col-sm-6 col-md-4">
+                <select id="deptFilter" class="form-select">
+                  <option value="">All Departments</option>
+                  <option value="CSE Department">CSE Department</option>
+                  <option value="IT Department">IT Department</option>
+                  <option value="Civil Department">Civil Department</option>
+                  <option value="Mechanical Department">Mechanical Department</option>
+                  <option value="Chemical Department">Chemical Department</option>
+                  <option value="Electronics Department">Electronics Department</option>
+                  <option value="Electrical Department">Electrical Department</option>
+                  <option value="Metallurgy Department">Metallurgy Department</option>
+                  <option value="MACS Department">MACS Department</option>
+                </select>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <button id="profRefresh" class="btn btn-primary w-100">
+                  <span id="refreshText">Refresh</span>
+                </button>
+              </div>
+            </div>
+            <div id="profList" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
   <script>
     const token = localStorage.getItem('token');
     if (!token) {
@@ -38,9 +336,9 @@
     } else {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        document.getElementById('welcome').innerText = `Hello ${payload.sub || payload.email || ''} (ROLE: ${payload.role || ''})`;
+        document.getElementById('welcome').innerText = `Welcome, ${payload.sub || payload.email || ''} • ${payload.role || ''}`;
       } catch (e) {
-        document.getElementById('welcome').innerText = 'Hello (invalid token)';
+        document.getElementById('welcome').innerText = 'Welcome';
       }
     }
     document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -48,9 +346,10 @@
       window.location.href = '/';
     });
 
+    let isLoading = false;
+
     async function fetchProfessors(q) {
       const headers = { 'Authorization': 'Bearer ' + token };
-      // Always use the search endpoint so the backend can honor role=PROFF filtering.
       let url = `/admin-api/users/search?role=PROFF`;
       if (q && q.trim() !== '') {
         url += `&q=${encodeURIComponent(q)}`;
@@ -62,41 +361,76 @@
     }
 
     function renderProfessors(list) {
-      const sort = document.getElementById('profSort').value;
-      if (sort) {
-        list.sort((a,b) => { const da = (a.department||'').toLowerCase(); const db = (b.department||'').toLowerCase(); return sort === 'asc' ? da.localeCompare(db) : db.localeCompare(da); });
+      // apply department filter from dropdown (case-insensitive exact match)
+      const deptEl = document.getElementById('deptFilter');
+      const selectedDept = deptEl ? (deptEl.value || '').trim() : '';
+      if (selectedDept) {
+        list = list.filter(p => ((p.department || '').toString().trim().toLowerCase() === selectedDept.toLowerCase()));
       }
       const container = document.getElementById('profList');
-      if (!list || list.length === 0) { container.innerHTML = '<div class="text-muted">No professors found</div>'; return; }
-      container.innerHTML = '<div class="list-group">' + list.map(p => `
-        <div class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-            <div class="fw-bold">${p.name || p.email}</div>
-            <div class="text-muted small">${p.department || ''}</div>
+      if (!list || list.length === 0) { 
+        container.innerHTML = `
+          <div class="col-12">
+            <div class="no-results">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <div>No professors found</div>
+              <small>Try adjusting your search criteria</small>
+            </div>
           </div>
-          <div>
-            <button class="btn btn-sm btn-outline-primary viewBtn" data-email="${p.email}">View</button>
+        `; 
+        return; 
+      }
+      
+      container.innerHTML = list.map(p => `
+        <div class="col" style="animation: fadeIn 0.5s ease">
+          <div class="card professor-card">
+            <div class="card-body d-flex flex-column">
+              <h6 class="card-title">${p.name || p.email}</h6>
+              ${p.department ? `<span class="department">${p.department}</span>` : ''}
+              <div class="mt-auto pt-3 d-flex justify-content-between align-items-center">
+                <a class="btn btn-sm btn-outline-primary viewBtn" data-email="${p.email}">View Profile</a>
+                ${p.designation ? `<span class="designation-badge">${p.designation}</span>` : ''}
+              </div>
+            </div>
           </div>
-        </div>`).join('') + '</div>';
+        </div>
+      `).join('');
 
-      // wire view buttons
-      Array.from(document.getElementsByClassName('viewBtn')).forEach(b => b.addEventListener('click', (ev) => {
+      Array.from(container.getElementsByClassName('viewBtn')).forEach(b => b.addEventListener('click', (ev) => {
         const em = ev.currentTarget.getAttribute('data-email');
         if (em) window.location.href = `/prof-view.html?email=${encodeURIComponent(em)}`;
       }));
     }
 
     async function loadProfessors() {
+      if (isLoading) return;
+      isLoading = true;
+      
+      const refreshBtn = document.getElementById('profRefresh');
+      const refreshText = document.getElementById('refreshText');
+      refreshText.innerHTML = '<span class="loading-spinner"></span>';
+      refreshBtn.disabled = true;
+      
       const q = document.getElementById('profSearch').value;
       const list = await fetchProfessors(q);
       renderProfessors(list);
+      
+      refreshText.textContent = 'Refresh';
+      refreshBtn.disabled = false;
+      isLoading = false;
     }
 
-    document.getElementById('profRefresh').addEventListener('click', loadProfessors);
-    document.getElementById('profSort').addEventListener('change', loadProfessors);
-    document.getElementById('profSearch').addEventListener('input', () => { /* debounce could be added */ loadProfessors(); });
+  document.getElementById('profRefresh').addEventListener('click', loadProfessors);
+  document.getElementById('deptFilter').addEventListener('change', loadProfessors);
+    
+    let searchTimeout;
+    document.getElementById('profSearch').addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(loadProfessors, 300);
+    });
 
-    // initial load
     loadProfessors();
   </script>
 </body>

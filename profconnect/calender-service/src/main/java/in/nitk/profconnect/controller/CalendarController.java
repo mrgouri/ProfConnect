@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Map;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/calendar-api")
@@ -37,29 +37,124 @@ public class CalendarController {
 
     @GetMapping("/oauth2/callback")
     public void oauthCallback(@RequestParam String code, @RequestParam String state, HttpServletResponse response) throws Exception {
+        // state contains the email
         service.handleCallback(code, state);
         response.sendRedirect("http://localhost:3001/prof-calendar.html?linked=true");
     }
 
 
     @GetMapping("/events")
-    public ResponseEntity<?> listEvents(@RequestParam String email, @RequestParam(defaultValue = "10") int max) throws Exception {
-        List<Map<String, String>> events = service.listEvents(email, max);
-        return ResponseEntity.ok(events);
+    public ResponseEntity<?> listEvents(@RequestParam String email, @RequestParam(defaultValue = "10") int max) {
+        try {
+            List<Map<String, Object>> events = service.listEvents(email, max);
+            if (events == null || events.isEmpty()) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
+            return ResponseEntity.ok(events);
+        } catch (Exception e) {
+            System.err.println("❌ Error fetching events for " + email + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(404).body(Map.of(
+                "error", e.getMessage() != null ? e.getMessage() : "Failed to fetch events",
+                "message", e.getMessage() != null ? e.getMessage() : "Failed to fetch events"
+            ));
+        }
     }
 
     @PostMapping("/events")
-    public ResponseEntity<?> createEvent(@RequestParam String email, @RequestBody EventRequestDto body) throws Exception {
-        Event event = new Event();
-        event.setSummary(body.getSummary() != null ? body.getSummary() : "Meeting");
-        event.setDescription(body.getDescription());
-        event.setStart(new com.google.api.services.calendar.model.EventDateTime()
-                .setDateTime(new com.google.api.client.util.DateTime(body.getStart())));
-        event.setEnd(new com.google.api.services.calendar.model.EventDateTime()
-                .setDateTime(new com.google.api.client.util.DateTime(body.getEnd())));
+    public ResponseEntity<?> createEvent(@RequestParam String email, @RequestBody EventRequestDto body) {
+        try {
+            System.out.println("📥 Received event creation request for: " + email);
+            System.out.println("   Summary: " + body.getSummary());
+            System.out.println("   Start: " + body.getStart());
+            System.out.println("   End: " + body.getEnd());
+            
+            // Check if calendar is linked first
+            if (!service.isCalendarLinked(email)) {
+                System.err.println("❌ Calendar not linked for: " + email);
+                return ResponseEntity.status(404).body(java.util.Map.of(
+                    "error", "Calendar not linked",
+                    "message", "No calendar linked for " + email + ". Please connect your Google Calendar first."
+                ));
+            }
+            
+            Event event = new Event();
+            event.setSummary(body.getSummary() != null ? body.getSummary() : "Meeting");
+            event.setDescription(body.getDescription());
+            
+            // Parse and set start time
+            try {
+                com.google.api.client.util.DateTime startDateTime = new com.google.api.client.util.DateTime(body.getStart());
+                event.setStart(new com.google.api.services.calendar.model.EventDateTime()
+                        .setDateTime(startDateTime));
+                System.out.println("✅ Start time parsed: " + startDateTime.toStringRfc3339());
+            } catch (Exception e) {
+                System.err.println("❌ Error parsing start time: " + body.getStart() + " - " + e.getMessage());
+                return ResponseEntity.status(400).body(java.util.Map.of(
+                    "error", "Invalid start time format",
+                    "message", "Failed to parse start time: " + body.getStart()
+                ));
+            }
+            
+            // Parse and set end time
+            try {
+                com.google.api.client.util.DateTime endDateTime = new com.google.api.client.util.DateTime(body.getEnd());
+                event.setEnd(new com.google.api.services.calendar.model.EventDateTime()
+                        .setDateTime(endDateTime));
+                System.out.println("✅ End time parsed: " + endDateTime.toStringRfc3339());
+            } catch (Exception e) {
+                System.err.println("❌ Error parsing end time: " + body.getEnd() + " - " + e.getMessage());
+                return ResponseEntity.status(400).body(java.util.Map.of(
+                    "error", "Invalid end time format",
+                    "message", "Failed to parse end time: " + body.getEnd()
+                ));
+            }
+            
+            if (body.getLocation() != null && !body.getLocation().isBlank()) {
+                event.setLocation(body.getLocation());
+            }
 
-        Event created = service.createEvent(email, event);
-        if (created == null) return ResponseEntity.status(404).body(java.util.Map.of("message", "No calendar linked for " + email));
-        return ResponseEntity.ok(created);
+            Event created = service.createEvent(email, event);
+            if (created == null || created.getId() == null) {
+                System.err.println("❌ Event creation returned null or no ID");
+                return ResponseEntity.status(500).body(java.util.Map.of(
+                    "error", "Event creation failed",
+                    "message", "Failed to create event in Google Calendar"
+                ));
+            }
+            
+            System.out.println("✅ Event created successfully with ID: " + created.getId());
+            return ResponseEntity.ok(created);
+        } catch (Exception e) {
+            System.err.println("❌ Error in createEvent endpoint: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(java.util.Map.of(
+                "error", e.getMessage() != null ? e.getMessage() : "Failed to create event",
+                "message", e.getMessage() != null ? e.getMessage() : "Failed to create event in Google Calendar"
+            ));
+        }
+    }
+
+    @DeleteMapping("/events/{eventId}")
+    public ResponseEntity<?> deleteEvent(
+            @PathVariable String eventId,
+            @RequestParam String email,
+            @RequestParam(required = false) String reason,
+            @RequestParam(required = false) String studentEmail) {
+        try {
+            boolean deleted = service.deleteEvent(email, eventId, reason);
+            if (deleted) {
+                return ResponseEntity.ok(Map.of("message", "Event deleted successfully"));
+            } else {
+                return ResponseEntity.status(404).body(Map.of("message", "Event not found or could not be deleted"));
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error deleting event " + eventId + " for " + email + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                "error", e.getMessage() != null ? e.getMessage() : "Failed to delete event",
+                "message", e.getMessage() != null ? e.getMessage() : "Failed to delete event"
+            ));
+        }
     }
 }

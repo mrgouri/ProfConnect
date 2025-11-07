@@ -1,6 +1,6 @@
-package com.nitk.calendar.filter;
+package com.nitk.meeting.filter;
 
-import com.nitk.calendar.util.JwtUtil;
+import com.nitk.meeting.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -31,34 +31,6 @@ public class JwtFilter implements Filter {
             res.setStatus(HttpServletResponse.SC_OK);
             return;
         }
-        
-        // Allow OAuth callback without JWT
-        if (path.startsWith("/calendar-api/oauth2/callback")) {
-            chain.doFilter(request, response);
-            return;
-        }
-        
-        // Protect calendar-api endpoints (except callback)
-        if (path.startsWith("/calendar-api")) {
-            String auth = req.getHeader("Authorization");
-            if (auth == null || !auth.startsWith("Bearer ")) {
-                res.setStatus(HttpStatus.UNAUTHORIZED.value());
-                res.setContentType("application/json");
-                res.getWriter().write("{\"error\":\"Missing Authorization header\"}");
-                return;
-            }
-            String token = auth.substring(7);
-            if (!jwtUtil.validateToken(token)) {
-                res.setStatus(HttpStatus.UNAUTHORIZED.value());
-                res.setContentType("application/json");
-                res.getWriter().write("{\"error\":\"Invalid token\"}");
-                return;
-            }
-            // Token is valid, continue
-            chain.doFilter(request, response);
-            return;
-        }
-        
         // only protect admin-api endpoints
         if (path.startsWith("/admin-api")) {
             String auth = req.getHeader("Authorization");

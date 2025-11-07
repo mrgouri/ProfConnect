@@ -141,61 +141,24 @@ public class GoogleCalendarService {
                 .setApplicationName("profconnect-calendar")
                 .build();
 
-        // 🧩 Verify which Google account this token belongs to
-        try {
-            Oauth2 oauth2 = new Oauth2.Builder(httpTransport, JSON_FACTORY, credential)
-                    .setApplicationName("profconnect-calendar")
-                    .build();
-            Userinfo userInfo = oauth2.userinfo().get().execute();
-            System.out.println("🔍 Token belongs to Google account: " + userInfo.getEmail());
-        } catch (Exception e) {
-            System.out.println("⚠️ Could not verify token owner: " + e.getMessage());
-        }
-
-        // 📅 List all calendars
-        CalendarList calendarList = service.calendarList().list().execute();
-        System.out.println("📅 Calendars linked to this account:");
-        for (CalendarListEntry entry : calendarList.getItems()) {
-            System.out.println("→ " + entry.getSummary() + " | ID: " + entry.getId());
-        }
-
-        // 🗓️ Fetch events from all calendars (past + future)
-        for (CalendarListEntry entry : calendarList.getItems()) {
-            System.out.println("\n🗓️ Checking calendar: " + entry.getSummary() + " (" + entry.getId() + ")");
-            try {
-                Events events = service.events().list(entry.getId())
-                        .setMaxResults(100)
-                        .setOrderBy("startTime")
-                        .setSingleEvents(true)
-                        .setTimeMin(new DateTime("2000-01-01T00:00:00Z"))
-                        .execute();
-
-                if (events.getItems().isEmpty()) {
-                    System.out.println("⚪ No events found in this calendar.");
-                } else {
-                    for (Event event : events.getItems()) {
-                        String start = (event.getStart().getDateTime() != null)
-                                ? event.getStart().getDateTime().toStringRfc3339()
-                                : event.getStart().getDate().toStringRfc3339();
-                        System.out.println("📌 Event: " + event.getSummary() + " | Start: " + start);
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("⚠️ Could not fetch events for calendar " + entry.getSummary() + ": " + e.getMessage());
-            }
-        }
-
         return service;
     }
 
     /** Step 5: List events from user's primary calendar */
-    public List<Map<String, String>> listEvents(String email, int maxResults) throws Exception {
+    public List<Map<String, Object>> listEvents(String email, int maxResults) throws Exception {
         System.out.println("🔧 Building service for email: " + email);
+        
+        // Check if calendar is linked first
+        if (!isCalendarLinked(email)) {
+            System.out.println("❌ No calendar linked for: " + email);
+            throw new Exception("No calendar linked for " + email + ". Please connect your Google Calendar first.");
+        }
+        
         Calendar service = buildService(email);
 
         if (service == null) {
             System.out.println("❌ No calendar service for: " + email);
-            return Collections.emptyList();
+            throw new Exception("Failed to build calendar service for " + email);
         }
 
         System.out.println("✅ Fetching events from primary calendar...");
@@ -209,7 +172,7 @@ public class GoogleCalendarService {
                 .execute();
 
         List<Event> items = events.getItems();
-        List<Map<String, String>> myEvents = new ArrayList<>();
+        List<Map<String, Object>> myEvents = new ArrayList<>();
 
         if (items == null || items.isEmpty()) {
             System.out.println("🚫 No events found for user: " + email);
@@ -241,11 +204,26 @@ public class GoogleCalendarService {
 
             System.out.println("📅 Event: " + event.getSummary() + " | Start: " + start);
 
-            myEvents.add(Map.of(
-                    "title", event.getSummary() != null ? event.getSummary() : "(No Title)",
-                    "start", start,
-                    "end", end != null ? end : start
-            ));
+            // Determine if event is all-day (date-only, no time)
+            boolean isAllDay = event.getStart() != null && event.getStart().getDate() != null;
+            
+            Map<String, Object> eventMap = new java.util.HashMap<>();
+            eventMap.put("title", event.getSummary() != null ? event.getSummary() : "(No Title)");
+            eventMap.put("start", start);
+            eventMap.put("end", end != null ? end : start);
+            eventMap.put("allDay", isAllDay);
+            // Include event ID - this is critical for cancel functionality
+            if (event.getId() != null) {
+                eventMap.put("id", event.getId());
+            }
+            if (event.getDescription() != null) {
+                eventMap.put("description", event.getDescription());
+            }
+            if (event.getLocation() != null) {
+                eventMap.put("location", event.getLocation());
+            }
+            
+            myEvents.add(eventMap);
         }
 
         System.out.println("✅ Total events fetched: " + myEvents.size());
@@ -256,14 +234,63 @@ public class GoogleCalendarService {
 
     /** Step 6: Create new event in user's primary calendar */
     public Event createEvent(String email, Event event) throws Exception {
+        System.out.println("📅 Creating event in Google Calendar for: " + email);
+        System.out.println("   Event Summary: " + (event.getSummary() != null ? event.getSummary() : "N/A"));
+        System.out.println("   Event Start: " + (event.getStart() != null && event.getStart().getDateTime() != null ? event.getStart().getDateTime().toStringRfc3339() : "N/A"));
+        System.out.println("   Event End: " + (event.getEnd() != null && event.getEnd().getDateTime() != null ? event.getEnd().getDateTime().toStringRfc3339() : "N/A"));
+        
+        Calendar service = buildService(email);
+        if (service == null) {
+            System.out.println("❌ No calendar service for: " + email + " - Calendar may not be linked");
+            throw new Exception("No calendar linked for " + email + ". Please connect your Google Calendar first.");
+        }
+
+        try {
+            Event created = service.events().insert("primary", event).execute();
+            if (created != null && created.getId() != null) {
+                System.out.println("✅ Event created successfully in Google Calendar!");
+                System.out.println("   Event ID: " + created.getId());
+                System.out.println("   Event Link: " + (created.getHtmlLink() != null ? created.getHtmlLink() : "N/A"));
+                return created;
+            } else {
+                System.err.println("❌ Event creation returned null or no ID");
+                throw new Exception("Failed to create event in Google Calendar - no event ID returned");
+            }
+        } catch (com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
+            System.err.println("❌ Google Calendar API error: " + e.getMessage());
+            System.err.println("   Status Code: " + e.getStatusCode());
+            if (e.getDetails() != null) {
+                System.err.println("   Error Details: " + e.getDetails());
+            }
+            throw new Exception("Failed to create event in Google Calendar: " + e.getMessage(), e);
+        } catch (Exception e) {
+            System.err.println("❌ Error creating event: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /** Step 7: Delete event from user's primary calendar */
+    public boolean deleteEvent(String email, String eventId, String reason) throws Exception {
         Calendar service = buildService(email);
         if (service == null) {
             System.out.println("❌ No calendar service for: " + email);
-            return null;
+            return false;
         }
 
-        Event created = service.events().insert("primary", event).execute();
-        System.out.println("✅ Event created: " + created.getHtmlLink());
-        return created;
+        try {
+            service.events().delete("primary", eventId).execute();
+            System.out.println("✅ Event deleted: " + eventId + " for " + email);
+            if (reason != null && !reason.isBlank()) {
+                System.out.println("   Reason: " + reason);
+            }
+            return true;
+        } catch (com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
+            if (e.getStatusCode() == 404) {
+                System.out.println("⚠️ Event not found: " + eventId);
+                return false;
+            }
+            throw e;
+        }
     }
 }

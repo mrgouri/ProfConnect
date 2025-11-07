@@ -390,26 +390,34 @@
 
         // Initialize Google Calendar
         async function initGoogleCalendar() {
+            if (!currentUser || !currentUser.email) {
+                showAlert('No email found. Please sign in again.', 'error');
+                return;
+            }
+            
             try {
-                const response = await fetch('/calendar-api/auth-url', {
+                const response = await fetch(`/calendar-api/auth-url?email=${encodeURIComponent(currentUser.email)}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
                         'Content-Type': 'application/json'
-                    },
-                    params: new URLSearchParams({ email: currentUser.email })
+                    }
                 });
                 
                 if (response.ok) {
                     const data = await response.json();
-                    window.open(data.url, '_blank');
-                    showAlert('Please complete Google Calendar authorization in the popup window.');
+                    if (data && data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        showAlert('Failed to get authorization URL. Please try again.', 'error');
+                    }
                 } else {
-                    showAlert('Failed to initiate Google Calendar authorization', 'error');
+                    const errorText = await response.text().catch(() => 'Unknown error');
+                    showAlert(`Failed to initiate Google Calendar authorization: ${errorText}`, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showAlert('Error connecting to Google Calendar', 'error');
+                showAlert('Error connecting to Google Calendar: ' + error.message, 'error');
             }
         }
 

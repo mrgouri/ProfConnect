@@ -7,85 +7,274 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #4f46e5;
-      --primary-dark: #4338ca;
-      --secondary-color: #0ea5e9;
-      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --primary-color: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary-color: #8b5cf6;
+      --accent-color: #ec4899;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --card-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      background: #ffffff;
       min-height: 100vh;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #0f172a;
     }
 
     .navbar {
-      background: white !important;
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
+      background: rgba(248, 250, 252, 0.98) !important;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
       padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04);
+    }
+
+    .navbar .btn-outline-secondary {
+      background: transparent;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      color: #0f172a;
+    }
+
+    .navbar .btn-danger {
+      background: var(--danger-color);
+      border-color: var(--danger-color);
+      color: #fff;
     }
 
     .navbar-brand {
-      font-weight: 700;
+      font-weight: 800;
       font-size: 1.5rem;
-      background: var(--bg-gradient);
+      background: var(--card-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: -0.5px;
     }
 
     #welcome {
       font-size: 0.9rem;
-      color: #64748b !important;
+      color: #94a3b8 !important;
       font-weight: 500;
     }
 
+    .role-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #c4b5fd;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 0.5rem;
+    }
+
     .btn-outline-secondary {
-      border-color: #e2e8f0;
-      color: #64748b;
-      transition: all 0.3s ease;
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      color: #1e293b;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.625rem 1.25rem;
     }
 
     .btn-outline-secondary:hover {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-      color: #475569;
-      transform: translateY(-1px);
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.3);
+      color: #6366f1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border: none;
+      color: #ffffff;
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.625rem 1.25rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+      filter: brightness(1.05);
     }
 
     .btn-danger {
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      background: #ef4444;
       border: none;
-      transition: all 0.3s ease;
+      color: #ffffff;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .btn-danger:hover {
+      background: #dc2626;
+      color: white;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
     }
 
-    .main-card {
-      background: white;
-      border-radius: 16px;
-      box-shadow: var(--card-shadow);
-      border: none;
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeInUp {
+      from { 
+        opacity: 0; 
+        transform: translateY(40px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    .welcome-card {
+      background: rgba(248, 250, 252, 0.98);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+      position: relative;
       overflow: hidden;
-      animation: fadeIn 0.5s ease;
+      color: #0f172a;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12));
     }
 
-    .card-title {
+    .welcome-card h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    .welcome-subtitle {
+      font-size: 1rem;
+      color: #475569;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .action-btn {
+      background: #ffffff;
+      border: 1px solid rgba(15,23,42,0.06);
+      border-radius: 12px;
+      padding: 1rem;
+      text-decoration: none;
+      color: #0f172a;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(99,102,241,0.14), rgba(236,72,153,0.12));
+      transform: scaleX(0);
+      transition: transform 0.25s ease;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(15,23,42,0.06);
+      text-decoration: none;
+      color: #0f172a;
+    }
+
+    .action-btn:hover::before {
+      transform: scaleX(1);
+    }
+
+    .action-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      background: rgba(99,102,241,0.06);
+      color: #374151;
+    }
+
+    .action-icon.primary { background: rgba(99,102,241,0.08); }
+    .action-icon.secondary { background: rgba(139,92,246,0.06); }
+
+    .action-content h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      color: #1e293b;
+    }
+
+    .action-content p {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin: 0;
+    }
+
+    .feature-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      border: 1px solid rgba(15,23,42,0.06);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+    }
+
+    .feature-title {
       font-size: 1.5rem;
       font-weight: 700;
-      color: #1e293b;
       margin-bottom: 1.5rem;
+      color: #1e293b;
     }
 
     .search-bar {
@@ -94,7 +283,7 @@
 
     .search-bar input {
       border-radius: 12px;
-      border: 2px solid #e2e8f0;
+      border: 2px solid rgba(15, 23, 42, 0.1);
       padding: 0.65rem 1rem;
       transition: all 0.3s ease;
       font-size: 0.95rem;
@@ -102,13 +291,13 @@
 
     .search-bar input:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
       outline: none;
     }
 
     .form-select {
       border-radius: 12px;
-      border: 2px solid #e2e8f0;
+      border: 2px solid rgba(15, 23, 42, 0.1);
       padding: 0.65rem 1rem;
       transition: all 0.3s ease;
       font-size: 0.95rem;
@@ -116,32 +305,19 @@
 
     .form-select:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
       outline: none;
-    }
-
-    .btn-primary {
-      background: var(--bg-gradient);
-      border: none;
-      border-radius: 12px;
-      padding: 0.65rem 1.5rem;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
     }
 
     .professor-card {
       background: white;
-      border-radius: 16px;
-      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.06);
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       height: 100%;
       overflow: hidden;
       position: relative;
+      box-shadow: 0 6px 18px rgba(15,23,42,0.04);
     }
 
     .professor-card::before {
@@ -150,16 +326,16 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
-      background: var(--bg-gradient);
+      height: 3px;
+      background: linear-gradient(90deg, rgba(99,102,241,0.14), rgba(236,72,153,0.12));
       transform: scaleX(0);
       transition: transform 0.3s ease;
     }
 
     .professor-card:hover {
-      transform: translateY(-8px);
-      box-shadow: var(--card-shadow-hover);
-      border-color: transparent;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(15,23,42,0.06);
+      border-color: rgba(99, 102, 241, 0.2);
     }
 
     .professor-card:hover::before {
@@ -183,14 +359,14 @@
       font-weight: 500;
       display: inline-block;
       padding: 0.25rem 0.75rem;
-      background: #f1f5f9;
+      background: rgba(99, 102, 241, 0.06);
       border-radius: 20px;
       margin-bottom: 1rem;
     }
 
     .professor-card .designation-badge {
-      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-      color: #0369a1;
+      background: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
       font-size: 0.75rem;
       font-weight: 600;
       padding: 0.25rem 0.65rem;
@@ -206,13 +382,15 @@
       padding: 0.5rem 1.25rem;
       font-weight: 600;
       transition: all 0.3s ease;
+      background: transparent;
     }
 
     .btn-outline-primary:hover {
-      background: var(--bg-gradient);
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       border-color: transparent;
       color: white;
-      transform: scale(1.05);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }
 
     .no-results {
@@ -244,10 +422,18 @@
     }
 
     @media (max-width: 768px) {
-      .card-title {
-        font-size: 1.25rem;
+      .welcome-card {
+        padding: 2rem 1.5rem;
       }
-      
+
+      .welcome-card h1 {
+        font-size: 2rem;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+
       .navbar-brand {
         font-size: 1.25rem;
       }
@@ -255,33 +441,31 @@
       #welcome {
         display: none;
       }
+
+      .feature-card {
+        padding: 1.25rem;
+      }
+    }
+
+    body, body * {
+      color: #000 !important;
+    }
+
+    .action-content h3 {
+      color: #1e293b !important;
+    }
+
+    .action-content p {
+      color: #64748b !important;
+    }
+
+    .feature-title {
+      color: #1e293b !important;
     }
   </style>
 </head>
-<body class="p-4">
-  <div class="container">
-    <h1>Student Dashboard</h1>
-    <p id="welcome"></p>
-    <div class="mb-2">
-      <a href="/profile.html" class="btn btn-secondary">View Profile</a>
-      <a href="/calendar.html" class="btn btn-primary">📅 Book Appointments</a>
-      <button id="logoutBtn" class="btn btn-danger ms-2">Logout</button>
-    </div>
-    <div class="card mt-4" style="max-width:800px;">
-      <div class="card-body">
-        <h5 class="card-title">Professors</h5>
-        <div class="d-flex mb-2">
-          <input id="profSearch" class="form-control form-control-sm me-2" placeholder="Search by name...">
-          <select id="profSort" class="form-select form-select-sm" style="width:220px">
-            <option value="">Sort by department</option>
-            <option value="asc">Department ↑</option>
-            <option value="desc">Department ↓</option>
-          </select>
-          <button id="profRefresh" class="btn btn-sm btn-primary ms-2">Refresh</button>
-        </div>
-        <div id="profList"></div>
 <body>
-  <nav class="navbar navbar-expand-lg shadow-sm">
+  <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">ProfConnect</a>
       <div class="d-flex align-items-center">
@@ -292,59 +476,121 @@
     </div>
   </nav>
 
-  <main class="container my-4">
-    <div class="row">
-      <div class="col-12">
-        <div class="card main-card">
-          <div class="card-body">
-            <h5 class="card-title">Discover Professors</h5>
-            <div class="row g-3 align-items-center mb-4">
-              <div class="col-sm-12 col-md-5 search-bar">
-                <input id="profSearch" class="form-control" placeholder="🔍 Search by name or department...">
-              </div>
-              <div class="col-sm-6 col-md-4">
-                <select id="deptFilter" class="form-select">
-                  <option value="">All Departments</option>
-                  <option value="CSE Department">CSE Department</option>
-                  <option value="IT Department">IT Department</option>
-                  <option value="Civil Department">Civil Department</option>
-                  <option value="Mechanical Department">Mechanical Department</option>
-                  <option value="Chemical Department">Chemical Department</option>
-                  <option value="Electronics Department">Electronics Department</option>
-                  <option value="Electrical Department">Electrical Department</option>
-                  <option value="Metallurgy Department">Metallurgy Department</option>
-                  <option value="MACS Department">MACS Department</option>
-                </select>
-              </div>
-              <div class="col-sm-6 col-md-3">
-                <button id="profRefresh" class="btn btn-primary w-100">
-                  <span id="refreshText">Refresh</span>
-                </button>
-              </div>
-            </div>
-            <div id="profList" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4"></div>
+  <main class="dashboard-container">
+    <div class="welcome-card">
+      <h1>Student Dashboard</h1>
+      <p class="welcome-subtitle" id="welcomeSub"></p>
+      
+      <div class="quick-actions">
+        <a href="/profile.html" class="action-btn">
+          <div class="action-icon secondary">
+            ⚙️
           </div>
+          <div class="action-content">
+            <h3>Edit Profile</h3>
+            <p>Update your information and settings</p>
+          </div>
+        </a>
+        <a id="viewCalendarBtn" href="#" class="action-btn">
+          <div class="action-icon secondary">
+            📅
+          </div>
+          <div class="action-content">
+            <h3>View Calendar</h3>
+            <p>View your calendar events</p>
+          </div>
+        </a>
+        </a>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <h3 class="feature-title">Discover Professors</h3>
+      <div class="row g-3 align-items-center mb-4">
+        <div class="col-sm-12 col-md-5 search-bar">
+          <input id="profSearch" class="form-control" placeholder="🔍 Search by name or department...">
+        </div>
+        <div class="col-sm-6 col-md-4">
+          <select id="deptFilter" class="form-select">
+            <option value="">All Departments</option>
+            <option value="CSE Department">CSE Department</option>
+            <option value="IT Department">IT Department</option>
+            <option value="Civil Department">Civil Department</option>
+            <option value="Mechanical Department">Mechanical Department</option>
+            <option value="Chemical Department">Chemical Department</option>
+            <option value="Electronics Department">Electronics Department</option>
+            <option value="Electrical Department">Electrical Department</option>
+            <option value="Metallurgy Department">Metallurgy Department</option>
+            <option value="MACS Department">MACS Department</option>
+          </select>
+        </div>
+        <div class="col-sm-6 col-md-3">
+          <button id="profRefresh" class="btn btn-primary w-100">
+            <span id="refreshText">Refresh</span>
+          </button>
         </div>
       </div>
+      <div id="profList" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4"></div>
+    </div>
+
+    <div class="feature-card">
+      <h3 class="feature-title">Calendar Integration</h3>
+      <div id="calendarStatus" class="mb-3"></div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button id="authenticateCalendar" class="btn btn-primary">
+          Connect Google Calendar
+        </button>
+        <!-- <a id="viewCalendarBtn" href="#" class="btn btn-outline-secondary">View My Calendar</a> -->
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <h3 class="feature-title">Upcoming Meetings</h3>
+      <div id="upcomingContainer" class="row row-cols-1 row-cols-md-2 g-3"></div>
     </div>
   </main>
 
   <script>
+    let userEmail = null;
     const token = localStorage.getItem('token');
     if (!token) {
       window.location.href = '/';
     } else {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        document.getElementById('welcome').innerText = `Welcome, ${payload.sub || payload.email || ''} • ${payload.role || ''}`;
+        userEmail = payload.sub || payload.email || null;
+        if (userEmail) {
+          localStorage.setItem('userEmail', userEmail);
+        }
+        const userName = payload.sub || payload.email || 'Student';
+        const userRole = payload.role || 'User';
+        
+        document.getElementById('welcome').innerHTML = `
+          Hello, ${userName}
+          <span class="role-badge">${userRole}</span>
+        `;
+        
+        document.getElementById('welcomeSub').innerHTML = `
+          Welcome back, <strong>${userName}</strong>! Discover and connect with professors.
+        `;
       } catch (e) {
-        document.getElementById('welcome').innerText = 'Welcome';
+        document.getElementById('welcome').innerText = 'Hello (invalid token)';
+        document.getElementById('welcomeSub').innerText = 'Welcome to your dashboard';
       }
     }
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('token');
       window.location.href = '/';
     });
+
+    // ✅ Fix for dynamic "View My Calendar" link
+    const calendarLink = document.getElementById('viewCalendarBtn');
+    if (calendarLink && userEmail) {
+      calendarLink.href = `/student-calendar.html?email=${encodeURIComponent(userEmail)}`;
+    } else if (calendarLink) {
+      calendarLink.style.display = 'none'; // hide if no email available
+    }
+    
 
     let isLoading = false;
 
@@ -432,6 +678,129 @@
     });
 
     loadProfessors();
+
+    // --- Calendar integration for students (same API by email) ---
+    function checkCalendarAuth() {
+      const token = localStorage.getItem('token');
+      const email = localStorage.getItem('userEmail');
+
+      if (!email) return;
+
+      fetch(`/calendar-api/status?email=${encodeURIComponent(email)}`, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        const statusDiv = document.getElementById('calendarStatus');
+        if (!statusDiv) return;
+        if (data.connected) {
+          statusDiv.innerHTML = '<div class="alert alert-success">Calendar Connected</div>';
+          const btn = document.getElementById('authenticateCalendar');
+          if (btn) btn.style.display = 'none';
+        } else {
+          statusDiv.innerHTML = '<div class="alert alert-warning">Calendar Not Connected</div>';
+        }
+      }).catch(() => {
+        const statusDiv = document.getElementById('calendarStatus');
+        if (statusDiv) statusDiv.innerHTML = '<div class="alert alert-warning">Unable to check calendar status</div>';
+      });
+    }
+
+    const authBtn = document.getElementById('authenticateCalendar');
+    if (authBtn) {
+      authBtn.onclick = () => {
+        const token = localStorage.getItem('token');
+        const email = localStorage.getItem('userEmail');
+        
+        if (!email) {
+          alert('No email found. Please sign in again.');
+          return;
+        }
+        fetch(`/calendar-api/auth-url?email=${encodeURIComponent(email)}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data && data.url) {
+            window.location.href = data.url;
+          } else {
+            alert('Failed to get authorization URL. Please try again.');
+          }
+        })
+        .catch(error => {
+          console.error('Error connecting to Google Calendar:', error);
+          alert('Failed to connect to Google Calendar. Please check your connection and try again.');
+        });
+      };
+    }
+
+    checkCalendarAuth();
+
+    // --- Upcoming meetings from meeting-service ---
+    const meetingApiBase = '/booking-api';
+
+    function formatDateTimeRange(startIso, endIso) {
+      try {
+        const s = new Date(startIso);
+        const e = new Date(endIso);
+        const day = s.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        const startT = s.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        const endT = e.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        return `${day}, ${startT} to ${endT}`;
+      } catch { return `${startIso} - ${endIso}`; }
+    }
+
+    async function loadUpcomingMeetings() {
+      const email = localStorage.getItem('userEmail');
+      if (!email) return;
+      const container = document.getElementById('upcomingContainer');
+      container.innerHTML = '<div class="col"><div class="text-muted">Loading...</div></div>';
+      try {
+        const res = await fetch(`${meetingApiBase}/bookings?studentEmail=${encodeURIComponent(email)}`);
+        const list = res.ok ? await res.json() : [];
+        if (!list || list.length === 0) {
+          container.innerHTML = '<div class="col"><div class="text-muted">No upcoming meetings</div></div>';
+          return;
+        }
+        const upcoming = list.filter(b => b.status === 'BOOKED').sort((a,b)=> (a.startIso||'').localeCompare(b.startIso));
+        container.innerHTML = upcoming.map(b => `
+          <div class="col">
+            <div class="card" style="border-radius:12px; border:1px solid rgba(15,23,42,0.06);">
+              <div class="card-body">
+                <h6 class="card-title" style="font-weight:700;">${b.title || 'Meeting'}</h6>
+                <div class="mb-1"><strong>Professor:</strong> ${b.professorEmail}</div>
+                <div class="mb-2"><strong>Date & Time:</strong> ${formatDateTimeRange(b.startIso, b.endIso)}</div>
+                <button class="btn btn-danger btn-sm" data-id="${b.id}">Cancel Meeting</button>
+              </div>
+            </div>
+          </div>`).join('');
+
+        Array.from(container.querySelectorAll('.btn-danger')).forEach(btn => {
+          btn.addEventListener('click', async (ev) => {
+            const id = ev.currentTarget.getAttribute('data-id');
+            if (!id) return;
+            if (!confirm('Cancel this meeting?')) return;
+            const r = await fetch(`${meetingApiBase}/bookings/${id}`, { method: 'DELETE' });
+            if (r.ok) loadUpcomingMeetings();
+          });
+        });
+      } catch (e) {
+        document.getElementById('upcomingContainer').innerHTML = '<div class="col"><div class="text-danger">Failed to load meetings</div></div>';
+      }
+    }
+
+    loadUpcomingMeetings();
   </script>
 </body>
 </html>

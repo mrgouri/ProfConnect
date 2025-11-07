@@ -5,169 +5,471 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Professor Profile</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css' rel='stylesheet' />
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js'></script>
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary-color: #8b5cf6;
+      --accent-color: #ec4899;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --card-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ffffff;
+      min-height: 100vh;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #0f172a;
+    }
+
+    .navbar {
+      background: rgba(248, 250, 252, 0.98) !important;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04);
+    }
+
+    .navbar .btn-outline-secondary {
+      background: transparent;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      color: #0f172a;
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.5rem;
+      background: var(--card-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeInUp {
+      from { 
+        opacity: 0; 
+        transform: translateY(40px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    .profile-card {
+      background: rgba(248, 250, 252, 0.98);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12));
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--card-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: white;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .profile-info h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    .profile-info .designation {
+      display: inline-block;
+      padding: 0.375rem 0.875rem;
+      background: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .profile-info .department {
+      color: #64748b;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .action-button {
+      background: #ffffff;
+      border: 2px solid rgba(15,23,42,0.06);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-decoration: none;
+      color: #0f172a;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .action-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(99,102,241,0.14), rgba(236,72,153,0.12));
+      transform: scaleX(0);
+      transition: transform 0.25s ease;
+    }
+
+    .action-button:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(15,23,42,0.06);
+      text-decoration: none;
+      color: #0f172a;
+      border-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .action-button:hover::before {
+      transform: scaleX(1);
+    }
+
+    .action-button.primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-color: transparent;
+      color: #ffffff;
+    }
+
+    .action-button.primary:hover {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      filter: brightness(1.05);
+    }
+
+    .action-icon {
+      font-size: 1.5rem;
+    }
+
+    .location-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .location-link:hover {
+      background: rgba(16, 185, 129, 0.2);
+      transform: translateY(-2px);
+      text-decoration: none;
+      color: #047857;
+    }
+
+    .btn-outline-secondary {
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      color: #1e293b;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.625rem 1.25rem;
+    }
+
+    .btn-outline-secondary:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.3);
+      color: #6366f1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .profile-header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .action-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    body, body * {
+      color: #000 !important;
+    }
+  </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+  <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">ProfConnect</a>
       <div class="d-flex align-items-center">
-        <span id="welcome" class="me-3 text-muted small"></span>
-        <a href="/student.html" class="btn btn-outline-secondary btn-sm me-2">Back</a>
+        <a href="/student.html" class="btn btn-outline-secondary btn-sm me-2">← Back to Dashboard</a>
       </div>
     </div>
-
-    <!-- Add this where you want to show the calendar -->
-    <div class="card mb-4">
-      <div class="card-header">
-          <h5>Professor's Calendar</h5>
-      </div>
-      <div class="card-body">
-          <div id="profCalendar"></div>
-      </div>
-    </div>
-  </div>
   </nav>
 
-  <main class="container my-4">
-    <div id="profCard" class="card mx-auto" style="max-width:900px;"></div>
+  <main class="dashboard-container">
+    <div id="profileContent">
+      <div class="profile-card">
+        <div id="loadingSpinner" style="text-align: center; padding: 3rem;">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3 text-muted">Loading professor profile...</p>
+        </div>
+      </div>
+    </div>
   </main>
+
   <script>
     const token = localStorage.getItem('token');
-    if (!token) { window.location.href = '/'; }
-    try { const payload = JSON.parse(atob(token.split('.')[1])); document.getElementById('welcome').innerText = `Hello ${payload.sub || payload.email}`; } catch(e) { document.getElementById('welcome').innerText = '' }
+    if (!token) {
+      window.location.href = '/';
+    }
+
+    let professorEmail = null;
+    let professorData = null;
 
     async function loadProf() {
-  const params = new URLSearchParams(window.location.search);
-  const email = params.get('email');
-  if (!email) {
-    document.getElementById('profCard').innerText = 'No professor specified';
-    return;
-  }
+      const params = new URLSearchParams(window.location.search);
+      const email = params.get('email');
+      
+      if (!email) {
+        document.getElementById('profileContent').innerHTML = `
+          <div class="profile-card">
+            <div class="alert alert-danger">No professor specified</div>
+          </div>
+        `;
+        return;
+      }
 
-  // Try new profile-service first, fallback to admin-api
-  let res;
-  try {
-    res = await fetch(`http://localhost:8083/profiles/by-email?email=${encodeURIComponent(email)}`, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    if (!res.ok) {
-      res = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(email)}`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      professorEmail = email;
+
+      try {
+        // Try profile service first, then fallback to admin-api
+        let res;
+        try {
+          res = await fetch(`http://localhost:8083/profiles/by-email?email=${encodeURIComponent(email)}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (!res.ok) {
+            res = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(email)}`, {
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+          }
+        } catch (err) {
+          res = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(email)}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+        }
+
+        if (!res.ok) {
+          let errorMsg = 'Unable to load professor profile';
+          try {
+            const j = await res.json();
+            if (j && j.error) errorMsg += ': ' + j.error;
+          } catch (e) {}
+          document.getElementById('profileContent').innerHTML = `
+            <div class="profile-card">
+              <div class="alert alert-danger">${errorMsg}</div>
+            </div>
+          `;
+          return;
+        }
+
+        const j = await res.json();
+        const u = j.user || {};
+        professorData = u;
+
+        renderProfile(u);
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        document.getElementById('profileContent').innerHTML = `
+          <div class="profile-card">
+            <div class="alert alert-danger">Error loading professor profile. Please try again.</div>
+          </div>
+        `;
+      }
     }
-  } catch (err) {
-    res = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(email)}`, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-  }
 
-  if (!res.ok) {
-    let t = 'Unable to load';
-    try {
-      const j = await res.json();
-      if (j && j.error) t += ': ' + j.error;
-    } catch (e) {}
-    document.getElementById('profCard').innerText = t;
-    return;
-  }
+    function renderProfile(u) {
+      const name = u.name || u.email || 'Professor';
+      const initial = name.charAt(0).toUpperCase();
+      const designation = u.designation || '';
+      const department = u.department || 'Not specified';
+      const email = u.email || '';
+      const room = u.room || u.roomNumber || 'Not specified';
+      const staffId = u.staffId || '';
+      const location = u.location || '';
+      
+      const emailParam = encodeURIComponent(email);
 
-  const j = await res.json();
-  const u = j.user || {};
-
-  const rows = [
-    ['Name', u.name || ''],
-    ['Email', u.email || ''],
-    ['Department', u.department || ''],
-    ['Designation', u.designation || ''],
-    ['Room', u.room || u.roomNumber || ''],
-    ['Staff ID', u.staffId || ''],
-    ['Location', u.location || 'Not Added']
-  ];
-
-  // Build the table with Google Maps link for location
-  let tbodyHtml = '';
-  rows.forEach(r => {
-    if (r[0] === 'Location') {
-      const locVal = (u.location == null || u.location === '') ? 'Not Added' : u.location;
-      if (u.location != null && String(u.location).trim() !== '') {
-        const mapsQuery = `${u.location}, NITK Surathkal`;
+      let locationHtml = '';
+      if (location && location.trim() !== '') {
+        const mapsQuery = `${location}, NITK Surathkal`;
         const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`;
-        tbodyHtml += `<tr><th style="width:160px">${r[0]}</th><td>${locVal} 
-          <a target="_blank" rel="noopener noreferrer" href="${mapsUrl}" class="btn btn-sm btn-outline-success ms-2">
-            Open in Google Maps
-          </a></td></tr>`;
+        locationHtml = `
+          <div class="info-item">
+            <span class="info-label">Location</span>
+            <span class="info-value">${location}</span>
+            <a href="${mapsUrl}" target="_blank" class="location-link">
+              📍 Open in Google Maps
+            </a>
+          </div>
+        `;
       } else {
-        tbodyHtml += `<tr><th style="width:160px">${r[0]}</th><td>${locVal}</td></tr>`;
-      }
-    } else {
-      tbodyHtml += `<tr><th style="width:160px">${r[0]}</th><td>${r[1]}</td></tr>`;
-    }
-  });
-
-  const table = `<div class="card-body"><table class="table table-sm"><tbody>${tbodyHtml}</tbody></table>`;
-  const emailParam = encodeURIComponent(u.email || '');
-
-  const buttons = `
-    <div class="px-3 pb-3">
-      <button class="btn btn-sm btn-outline-primary me-2" id="openCalendarBtn">Open Calendar</button>
-      <a href="/book-meeting.html?email=${emailParam}" class="btn btn-sm btn-primary">Book Meetings</a>
-    </div>
-  </div>`;
-
-  document.getElementById('profCard').innerHTML = table + buttons;
-
-  // Add click event to toggle calendar display
-  document.getElementById('openCalendarBtn').addEventListener('click', () => {
-    const existing = document.getElementById('profCalendar');
-    if (existing) {
-      existing.remove(); // Toggle off if already shown
-      return;
-    }
-
-    // Create and show calendar container
-    const div = document.createElement('div');
-    div.id = 'profCalendar';
-    div.style.height = '600px';
-    div.className = 'p-3';
-    document.getElementById('profCard').appendChild(div);
-
-    // Now load the calendar dynamically
-    loadProfessorCalendar(u.email);
-  });
-}
-
-
-      function loadProfessorCalendar(profEmail) {
-        window.location.href = `/prof-calendar.html?email=${encodeURIComponent(profEmail)}`;
+        locationHtml = `
+          <div class="info-item">
+            <span class="info-label">Location</span>
+            <span class="info-value">Not Added</span>
+          </div>
+        `;
       }
 
+      const html = `
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar">${initial}</div>
+            <div class="profile-info">
+              <h1>${name}</h1>
+              ${designation ? `<span class="designation">${designation}</span>` : ''}
+              <div class="department">${department}</div>
+            </div>
+          </div>
 
-    function requestAppointment(profEmail, start, end) {
-        const studentEmail = localStorage.getItem('userEmail');
-        
-        fetch(`http://localhost:8084/calendar-api/request`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                professorEmail: profEmail,
-                studentEmail: studentEmail,
-                startTime: start,
-                endTime: end,
-                title: 'Meeting Request'
-            })
-        })
-        .then(res => {
-            if (res.ok) {
-                alert('Appointment request sent!');
-            } else {
-                alert('Failed to send request');
-            }
-        });
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span class="info-value">${email}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Department</span>
+              <span class="info-value">${department}</span>
+            </div>
+            ${room !== 'Not specified' ? `
+            <div class="info-item">
+              <span class="info-label">Room</span>
+              <span class="info-value">${room}</span>
+            </div>
+            ` : ''}
+            ${staffId ? `
+            <div class="info-item">
+              <span class="info-label">Staff ID</span>
+              <span class="info-value">${staffId}</span>
+            </div>
+            ` : ''}
+            ${locationHtml}
+          </div>
+
+          <div class="action-buttons">
+            <a href="/prof-calendar.html?email=${emailParam}" class="action-button">
+              <span class="action-icon">📅</span>
+              <span>View Calendar</span>
+            </a>
+            <a href="/book-meeting.html?email=${emailParam}" class="action-button primary">
+              <span class="action-icon">📝</span>
+              <span>Book Meeting</span>
+            </a>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('profileContent').innerHTML = html;
     }
 
     loadProf();

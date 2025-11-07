@@ -90,6 +90,58 @@ services:
     networks:
       - profconnect-network
 
+    # Meeting Service
+  meeting-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.meeting
+    container_name: profconnect-meeting
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/meetings?authSource=admin
+      JWT_SECRET: changeitchangeitchangeitchangeitchangeit
+      JWT_EXPIRATION_MS: 3600000
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_PROTOCOL: smtp
+      MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
+      MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
+    depends_on:
+      - mongodb
+    networks:
+      - profconnect-network
+
+    # Email Service
+  email-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.email
+    container_name: profconnect-email
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/emails?authSource=admin
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_PROTOCOL: smtp
+      MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
+      MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN}
+    depends_on:
+      - mongodb
+    networks:
+      - profconnect-network
+
+
   # Frontend
   frontend:
     build:

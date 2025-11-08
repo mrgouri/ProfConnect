@@ -40,6 +40,13 @@ public class JwtFilter implements Filter {
         
         // Protect calendar-api endpoints (except callback)
         if (path.startsWith("/calendar-api")) {
+            // Allow internal service calls from localhost (loopback) without JWT so meeting-service can call calendar endpoints.
+            String remoteAddr = req.getRemoteAddr();
+            if (remoteAddr != null && (remoteAddr.equals("127.0.0.1") || remoteAddr.equals("::1") || remoteAddr.equals("0:0:0:0:0:0:0:1"))) {
+                chain.doFilter(request, response);
+                return;
+            }
+
             String auth = req.getHeader("Authorization");
             if (auth == null || !auth.startsWith("Bearer ")) {
                 res.setStatus(HttpStatus.UNAUTHORIZED.value());

@@ -25,8 +25,14 @@ public class CalendarController {
 
     @GetMapping("/status")
     public ResponseEntity<?> checkCalendarStatus(@RequestParam String email) {
-        boolean linked = service.isCalendarLinked(email);
-        return ResponseEntity.ok(Map.of("connected", linked));
+        try {
+            String decoded = java.net.URLDecoder.decode(email, java.nio.charset.StandardCharsets.UTF_8);
+            boolean linked = service.isCalendarLinked(decoded);
+            return ResponseEntity.ok(Map.of("connected", linked));
+        } catch (Exception e) {
+            boolean linked = service.isCalendarLinked(email);
+            return ResponseEntity.ok(Map.of("connected", linked));
+        }
     }
 
 
@@ -46,7 +52,15 @@ public class CalendarController {
     @GetMapping("/events")
     public ResponseEntity<?> listEvents(@RequestParam String email, @RequestParam(defaultValue = "10") int max) {
         try {
-            List<Map<String, Object>> events = service.listEvents(email, max);
+            // decode percent-encoded email if present and validate
+            String decodedEmail = email;
+            try { decodedEmail = java.net.URLDecoder.decode(email, java.nio.charset.StandardCharsets.UTF_8); } catch (Exception ex) { }
+            if (decodedEmail == null || decodedEmail.isBlank()) {
+                System.err.println("❌ Missing or empty email parameter for listEvents");
+                return ResponseEntity.badRequest().body(Map.of("error", "email query parameter is required"));
+            }
+
+            List<Map<String, Object>> events = service.listEvents(decodedEmail, max);
             if (events == null || events.isEmpty()) {
                 return ResponseEntity.ok(Collections.emptyList());
             }
@@ -64,17 +78,20 @@ public class CalendarController {
     @PostMapping("/events")
     public ResponseEntity<?> createEvent(@RequestParam String email, @RequestBody EventRequestDto body) {
         try {
-            System.out.println("📥 Received event creation request for: " + email);
+            // decode percent-encoded emails if present (incoming callers may encode the query param)
+            String decodedEmail = email;
+            try { decodedEmail = java.net.URLDecoder.decode(email, java.nio.charset.StandardCharsets.UTF_8); } catch (Exception ex) { /* ignore */ }
+            System.out.println("📥 Received event creation request for: " + email + " (decoded: " + decodedEmail + ")");
             System.out.println("   Summary: " + body.getSummary());
             System.out.println("   Start: " + body.getStart());
             System.out.println("   End: " + body.getEnd());
             
-            // Check if calendar is linked first
-            if (!service.isCalendarLinked(email)) {
-                System.err.println("❌ Calendar not linked for: " + email);
+            // Check if calendar is linked first (use decoded email)
+            if (!service.isCalendarLinked(decodedEmail)) {
+                System.err.println("❌ Calendar not linked for: " + decodedEmail);
                 return ResponseEntity.status(404).body(java.util.Map.of(
                     "error", "Calendar not linked",
-                    "message", "No calendar linked for " + email + ". Please connect your Google Calendar first."
+                    "message", "No calendar linked for " + decodedEmail + ". Please connect your Google Calendar first."
                 ));
             }
             
@@ -114,7 +131,7 @@ public class CalendarController {
                 event.setLocation(body.getLocation());
             }
 
-            Event created = service.createEvent(email, event);
+            Event created = service.createEvent(decodedEmail, event);
             if (created == null || created.getId() == null) {
                 System.err.println("❌ Event creation returned null or no ID");
                 return ResponseEntity.status(500).body(java.util.Map.of(
@@ -142,7 +159,9 @@ public class CalendarController {
             @RequestParam(required = false) String reason,
             @RequestParam(required = false) String studentEmail) {
         try {
-            boolean deleted = service.deleteEvent(email, eventId, reason);
+            String decodedEmail = email;
+            try { decodedEmail = java.net.URLDecoder.decode(email, java.nio.charset.StandardCharsets.UTF_8); } catch (Exception ex) { }
+            boolean deleted = service.deleteEvent(decodedEmail, eventId, reason);
             if (deleted) {
                 return ResponseEntity.ok(Map.of("message", "Event deleted successfully"));
             } else {

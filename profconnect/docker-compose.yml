@@ -28,7 +28,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/authentication?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb+srv://gouri:password2@cluster0.7gkb1to.mongodb.net/authentication?retryWrites=true&w=majority&appName=Cluster0&ssl=true&sslInvalidHostNameAllowed=true&connectTimeoutMS=5000&socketTimeoutMS=5000&serverSelectionTimeoutMS=5000&maxPoolSize=5&minPoolSize=1
       JWT_SECRET: changeitchangeitchangeitchangeitchangeit
       JWT_EXPIRATION_MS: 3600000
     depends_on:
@@ -46,7 +46,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/users?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb+srv://gouri:password2@cluster0.7gkb1to.mongodb.net/users?retryWrites=true&w=majority&appName=Cluster0&ssl=true&sslInvalidHostNameAllowed=true&connectTimeoutMS=5000&socketTimeoutMS=5000&serverSelectionTimeoutMS=5000&maxPoolSize=5&minPoolSize=1
       JWT_SECRET: changeitchangeitchangeitchangeitchangeit
     depends_on:
       - mongodb
@@ -63,7 +63,7 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/users?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb+srv://gouri:password2@cluster0.7gkb1to.mongodb.net/users?retryWrites=true&w=majority&appName=Cluster0&ssl=true&sslInvalidHostNameAllowed=true&connectTimeoutMS=5000&socketTimeoutMS=5000&serverSelectionTimeoutMS=5000&maxPoolSize=5&minPoolSize=1
     depends_on:
       - mongodb
     networks:
@@ -79,11 +79,11 @@ services:
     ports:
       - "8084:8084"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/calendar?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb+srv://harshiniv218_db_user:6AsUAawu99sNKTC8@cluster0.2zmjrjl.mongodb.net/ProfConnect?retryWrites=true&w=majority
       JWT_SECRET: changeitchangeitchangeitchangeitchangeit
       JWT_EXPIRATION_MS: 3600000
-      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
-      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      GOOGLE_OAUTH_CLIENT_ID: '235092008595-j28mvmtmmd7kirntudfuhh7q6n2svs79.apps.googleusercontent.com'
+      GOOGLE_OAUTH_CLIENT_SECRET: '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'
       GOOGLE_OAUTH_REDIRECT_URI: http://localhost:3001/oauth2callback
     depends_on:
       - mongodb
@@ -100,20 +100,25 @@ services:
     ports:
       - "8085:8085"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/meetings?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb+srv://harshiniv218_db_user:6AsUAawu99sNKTC8@cluster0.2zmjrjl.mongodb.net/ProfConnect?retryWrites=true&w=majority
       JWT_SECRET: changeitchangeitchangeitchangeitchangeit
       JWT_EXPIRATION_MS: 3600000
+      GOOGLE_CLIENT_ID: 235092008595-j28mvmtmmd7kirntudfuhh7q6n2svs79.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
+      GOOGLE_REFRESH_TOKEN: <paste_your_refresh_token_here>
       MAIL_HOST: smtp.gmail.com
       MAIL_PORT: 587
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_USERNAME: profconnect11@gmail.com
+      MAIL_PASSWORD: vyld ymfk cloc rbjn
       MAIL_PROTOCOL: smtp
       MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
       MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
+      CALENDAR_API_KEY: very-secret-internal-key-please-change
     depends_on:
       - mongodb
     networks:
       - profconnect-network
+
 
     # Email Service
   email-service:
@@ -125,17 +130,18 @@ services:
     ports:
       - "8086:8086"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/emails?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb+srv://harshiniv218_db_user:6AsUAawu99sNKTC8@cluster0.2zmjrjl.mongodb.net/ProfConnect?retryWrites=true&w=majority
       MAIL_HOST: smtp.gmail.com
       MAIL_PORT: 587
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_USERNAME: profconnect11@gmail.com
+      MAIL_PASSWORD: vyld ymfk cloc rbjn
       MAIL_PROTOCOL: smtp
       MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
       MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: 235092008595-j28mvmtmmd7kirntudfuhh7q6n2svs79.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
       GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN}
+    command: ["java","-jar","/app/app.jar","--server.port=8086"]
     depends_on:
       - mongodb
     networks:
@@ -152,13 +158,19 @@ services:
     ports:
       - "3001:3001"
     environment:
-      BACKEND_URL: http://auth-service:8080
+      AUTH_URL: http://auth-service:8080
       CRUD_URL: http://crud-service:8081
       CALENDAR_URL: http://calendar-service:8084
+      PROFILE_URL: http://profile-service:8083
+      MEETING_URL: http://meeting-service:8085
+      EMAIL_URL: http://email-service:8086
     depends_on:
       - auth-service
       - crud-service
       - calendar-service
+      - profile-service
+      - meeting-service
+      - email-service
     networks:
       - profconnect-network
 

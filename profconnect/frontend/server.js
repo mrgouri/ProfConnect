@@ -5,11 +5,11 @@ const proxy = require('express-http-proxy');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
-const CALENDAR_URL = process.env.CALENDAR_URL || 'http://localhost:8084';
-const MEETING_URL = process.env.MEETING_URL || 'http://localhost:8085';
-const PROFILE_URL = process.env.PROFILE_URL || 'http://localhost:8083';
-const EMAIL_URL = process.env.EMAIL_URL || 'http://localhost:8086';
+const BACKEND_URL = 'http://auth-service:8080';
+const CALENDAR_URL = 'http://calendar-service:8084';
+const MEETING_URL = 'http://meeting-service:8085';
+const PROFILE_URL = 'http://profile-service:8083';
+const EMAIL_URL = 'http://email-service:8086';
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));

@@ -26,7 +26,7 @@ public class MeetingServiceApplication {
     public FilterRegistrationBean<JwtFilter> jwtFilterRegistration(JwtFilter filter) {
         FilterRegistrationBean<JwtFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(filter);
-        reg.addUrlPatterns("/meeting-api/*"); // protect booking APIs
+        reg.addUrlPatterns("/booking-api/*"); // protect booking APIs
         reg.setOrder(1);
         return reg;
     }

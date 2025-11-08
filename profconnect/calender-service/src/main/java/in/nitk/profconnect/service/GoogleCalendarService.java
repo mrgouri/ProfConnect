@@ -47,31 +47,41 @@ public class GoogleCalendarService {
     public String getAuthUrl(String email) throws Exception {
         var httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport,
-                JSON_FACTORY,
-                clientId,
-                clientSecret,
-                List.of(
-                        "https://www.googleapis.com/auth/calendar.events",
-                        "https://www.googleapis.com/auth/calendar.readonly",
-                        "https://www.googleapis.com/auth/userinfo.email"
-                )
+    GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+        httpTransport,
+        JSON_FACTORY,
+        clientId,
+        clientSecret,
+        List.of(
+            "https://www.googleapis.com/auth/calendar.events",
+            "https://www.googleapis.com/auth/calendar.readonly",
+            "https://www.googleapis.com/auth/userinfo.email"
         )
-        .setDataStoreFactory(new MemoryDataStoreFactory())
-        .setAccessType("offline")     // ✅ ensures refresh token is returned
-        .setApprovalPrompt("force")   // ✅ forces consent screen again
-        .build();
+    )
+    // Use in-memory store for the flow object only; persistent tokens are saved in MongoDB (tokenRepo)
+    .setDataStoreFactory(new MemoryDataStoreFactory())
+    .setAccessType("offline")     // ensures refresh token is requested
+    // Use the modern 'prompt=consent' parameter so Google returns a refresh token reliably
+    .build();
 
-        GoogleAuthorizationCodeRequestUrl url = flow.newAuthorizationUrl()
-                .setRedirectUri(redirectUri)
-                .setState(email);
+    GoogleAuthorizationCodeRequestUrl url = flow.newAuthorizationUrl()
+        .setRedirectUri(redirectUri)
+        .setState(email);
+    // force the consent screen to return a refresh token when needed
+    url.set("prompt", "consent");
 
         return url.build();
     }
 
     /** Step 2: Check if a user has linked their Google Calendar */
     public boolean isCalendarLinked(String email) {
+        try {
+            String decoded = java.net.URLDecoder.decode(email, java.nio.charset.StandardCharsets.UTF_8);
+            GoogleToken token = tokenRepo.findByUserEmail(decoded);
+            if (token != null) return true;
+        } catch (Exception ex) {
+            // ignore
+        }
         GoogleToken token = tokenRepo.findByUserEmail(email);
         return token != null;
     }
@@ -89,7 +99,18 @@ public class GoogleCalendarService {
 
         token.setUserEmail(email);
         token.setAccessToken(tokenResponse.getAccessToken());
-        token.setRefreshToken(tokenResponse.getRefreshToken());
+        // Only overwrite refresh token when Google actually returns one.
+        // Google may return null on subsequent authorizations unless prompt=consent is used.
+        if (tokenResponse.getRefreshToken() != null && !tokenResponse.getRefreshToken().isBlank()) {
+            token.setRefreshToken(tokenResponse.getRefreshToken());
+        } else {
+            // preserve existing refresh token if present
+            if (token.getRefreshToken() == null || token.getRefreshToken().isBlank()) {
+                System.out.println("⚠️ No refresh token returned by Google for " + email + " and none stored.");
+            } else {
+                System.out.println("ℹ️ No refresh token in callback; keeping previously stored refresh token for " + email);
+            }
+        }
         token.setExpiryTime(expiry);
 
         System.out.println("✅ Saving token for: " + email);
@@ -99,7 +120,19 @@ public class GoogleCalendarService {
 
     /** Step 4: Build authorized Calendar client for a user */
     private Calendar buildService(String email) throws Exception {
-        GoogleToken t = tokenRepo.findByUserEmail(email);
+        GoogleToken t = null;
+        try {
+            String decoded = java.net.URLDecoder.decode(email, java.nio.charset.StandardCharsets.UTF_8);
+            t = tokenRepo.findByUserEmail(decoded);
+            if (t != null) {
+                email = decoded; // use decoded for logging and further actions
+            }
+        } catch (Exception ex) {
+            // ignore
+        }
+        if (t == null) {
+            t = tokenRepo.findByUserEmail(email);
+        }
         if (t == null) {
             System.out.println("❌ No token found for: " + email);
             return null;
@@ -122,17 +155,29 @@ public class GoogleCalendarService {
         if (t.getExpiryTime() != null)
             credential.setExpirationTimeMilliseconds(t.getExpiryTime());
 
-        // 🔄 Refresh if expired or about to expire
-        if (credential.getExpiresInSeconds() != null && credential.getExpiresInSeconds() <= 60) {
-            System.out.println("🔄 Token about to expire, trying to refresh...");
-            boolean refreshed = credential.refreshToken();
-            if (refreshed) {
-                System.out.println("✅ Token refreshed successfully!");
-                t.setAccessToken(credential.getAccessToken());
-                t.setExpiryTime(credential.getExpirationTimeMilliseconds());
-                tokenRepo.save(t);
+        // 🔄 Refresh if expired or about to expire — use stored expiry time when available
+        long now = Instant.now().toEpochMilli();
+        boolean shouldRefresh = false;
+        if (t.getExpiryTime() != null) {
+            shouldRefresh = t.getExpiryTime() <= (now + 60L * 1000L);
+        } else if (credential.getExpiresInSeconds() != null) {
+            shouldRefresh = credential.getExpiresInSeconds() <= 60;
+        }
+
+        if (shouldRefresh) {
+            System.out.println("🔄 Token about to expire for " + email + ", attempting refresh...");
+            if (t.getRefreshToken() == null || t.getRefreshToken().isBlank()) {
+                System.out.println("❌ Cannot refresh token because no refresh token is stored for: " + email);
             } else {
-                System.out.println("❌ Token refresh failed. Stored refresh token may be invalid or missing.");
+                boolean refreshed = credential.refreshToken();
+                if (refreshed) {
+                    System.out.println("✅ Token refreshed successfully!");
+                    t.setAccessToken(credential.getAccessToken());
+                    t.setExpiryTime(credential.getExpirationTimeMilliseconds());
+                    tokenRepo.save(t);
+                } else {
+                    System.out.println("❌ Token refresh failed. Stored refresh token may be invalid.");
+                }
             }
         }
 

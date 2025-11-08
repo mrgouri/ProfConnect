@@ -339,10 +339,10 @@
             </div>
           </div>
 
-          <div class="form-group">
+          <!-- <div class="form-group">
             <label class="form-label">Location/Meeting Link</label>
             <input type="text" class="form-control" id="meetingLocation" placeholder="Room number, building, or online meeting link">
-          </div>
+          </div> -->
         </div>
 
         <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">
@@ -677,7 +677,7 @@
 
       const title = document.getElementById('meetingTitle').value.trim();
       const description = document.getElementById('meetingDescription').value.trim();
-      const location = document.getElementById('meetingLocation').value.trim();
+      // const location = document.getElementById('meetingLocation').value.trim();
 
       if (!title) {
         showAlert('Please enter a meeting title', 'danger');
@@ -733,7 +733,7 @@
           studentName: studentName,
           title: title,
           description: description || 'Meeting with professor',
-          location: location || '',
+          // location: location || '',
           startIso: selectedStartTime,
           endIso: selectedEndTime
         };
@@ -754,7 +754,7 @@
         });
 
         const data = await response.json().catch(() => ({}));
-
+        console.log('Booking response:', data);
         if (response.ok) {
           let successMsg = '✅ Meeting booked successfully!';
           successMsg += ' The event has been added to both your Google Calendar and the professor\'s Google Calendar.';
@@ -763,6 +763,7 @@
           showAlert(successMsg, 'success');
           
           console.log('✅ Booking successful, event should now be in Google Calendar');
+          console.log('Google Calendar event ID:', data.professorCalendarEventId);
           
           // Clear form
           document.getElementById('bookingForm').reset();
@@ -799,6 +800,7 @@
           }
           
           showAlert(`❌ ${errorMsg}`, 'danger');
+          console.error('Failed to book meeting:', data);
         }
       } catch (error) {
         console.error('Booking error:', error);

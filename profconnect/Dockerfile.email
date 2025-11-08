@@ -1,17 +1,17 @@
-FROM maven:3.8.6-openjdk-17 AS build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy pom.xml and download dependencies
-COPY pom.xml .
+COPY email-service/pom.xml .
 RUN mvn dependency:go-offline -B
 
 # Copy the full source code
-COPY src ./src
+COPY email-service/src ./src
 
 # Build the application without running tests
 RUN mvn clean package -DskipTests
 
-FROM openjdk:17-jdk-slim
+FROM 	eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 
 # Copy the built JAR from the build stage

@@ -1,11 +1,11 @@
 # Multi-stage build for Profile Service
-FROM maven:3.8.6-openjdk-17 AS build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 # Set working directory
 WORKDIR /app
 
 # Copy pom.xml and download dependencies
-COPY email-service/pom.xml .
+COPY profile-service/pom.xml .
 RUN mvn dependency:go-offline -B
 
 # Copy source code
@@ -15,7 +15,7 @@ COPY profile-service/src ./src
 RUN mvn clean package -DskipTests
 
 # Runtime stage
-FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jre-jammy
 
 # Set working directory
 WORKDIR /app

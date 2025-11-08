@@ -21,14 +21,27 @@ public class BookingController {
     }
 
     @PostMapping("/bookings")
-    public ResponseEntity<?> create(@RequestBody MeetingBooking booking) {
-        try {
-            MeetingBooking saved = bookingService.createBooking(booking);
-            return ResponseEntity.ok(saved);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
-        }
+    // public ResponseEntity<?> create(@RequestBody MeetingBooking booking) {
+    //     try {
+    //         MeetingBooking saved = bookingService.createBooking(booking);
+    //         return ResponseEntity.ok(saved);
+    //     } catch (IllegalArgumentException ex) {
+    //         return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+    //     }
+    // }
+
+public ResponseEntity<?> create(
+        @RequestBody MeetingBooking booking,
+        @RequestHeader(value = "Authorization", required = false) String authHeader) {
+            System.out.println("🔐 Received Authorization header for create: " + authHeader);
+    try {
+        MeetingBooking saved = bookingService.createBooking(booking, authHeader);
+
+        return ResponseEntity.ok(saved);
+    } catch (IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
     }
+}
 
     @GetMapping("/bookings/{id}")
     public ResponseEntity<?> get(@PathVariable String id) {
@@ -51,12 +64,22 @@ public class BookingController {
         return ResponseEntity.badRequest().body(Map.of("message", "Provide studentEmail or professorEmail"));
     }
 
-    @DeleteMapping("/bookings/{id}")
-    public ResponseEntity<?> cancel(@PathVariable String id, @RequestParam(required = false) String reason) {
-        boolean ok = bookingService.cancelBooking(id, reason);
-        if (!ok) return ResponseEntity.status(404).body(Map.of("message", "Booking not found"));
-        return ResponseEntity.ok(Map.of("message", "Booking cancelled"));
-    }
+//     @DeleteMapping("/bookings/{id}")
+//     public ResponseEntity<?> cancel(@PathVariable String id, @RequestParam(required = false) String reason) {
+//         boolean ok = bookingService.cancelBooking(id, reason);
+//         if (!ok) return ResponseEntity.status(404).body(Map.of("message", "Booking not found"));
+//         return ResponseEntity.ok(Map.of("message", "Booking cancelled"));
+//     }
+// }
+
+
+@DeleteMapping("/bookings/{id}")
+public ResponseEntity<?> cancel(@PathVariable String id,
+                                @RequestParam(required = false) String reason,
+                                @RequestHeader(name = "Authorization", required = false) String authHeader) {
+    System.out.println("🔐 Received Authorization header for delete: " + authHeader);
+    boolean ok = bookingService.cancelBooking(id, reason, authHeader);
+    if (!ok) return ResponseEntity.status(404).body(Map.of("message", "Booking not found"));
+    return ResponseEntity.ok(Map.of("message", "Booking cancelled"));
 }
-
-
+}

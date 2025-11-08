@@ -31,7 +31,7 @@ public class BookingService {
         this.emailClient = emailClient;
         this.calendarClient = calendarClient;
     }
-    
+
     /**
      * Fetch user name from profile service or CRUD service by email
      */
@@ -39,12 +39,12 @@ public class BookingService {
         if (!StringUtils.hasText(email)) {
             return "";
         }
-        
+
         try {
             // Try profile service first
             try {
-                String url = profileServiceUrl + "/profiles/by-email?email=" + 
-                    java.net.URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8);
+                String url = profileServiceUrl + "/profiles/by-email?email=" +
+                        java.net.URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8);
                 var response = restTemplate.getForEntity(url, Map.class);
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                     Map<String, Object> body = response.getBody();
@@ -68,11 +68,11 @@ public class BookingService {
             } catch (Exception e) {
                 System.out.println("⚠️ Profile service unavailable, trying CRUD service: " + e.getMessage());
             }
-            
+
             // Fallback to CRUD service
             try {
-                String url = crudServiceUrl + "/admin-api/users/by-email?email=" + 
-                    java.net.URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8);
+                String url = crudServiceUrl + "/admin-api/users/by-email?email=" +
+                        java.net.URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8);
                 var response = restTemplate.getForEntity(url, Map.class);
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                     Map<String, Object> body = response.getBody();
@@ -99,15 +99,15 @@ public class BookingService {
         } catch (Exception e) {
             System.err.println("❌ Error fetching user name for " + email + ": " + e.getMessage());
         }
-        
+
         return "";
     }
 
-    public MeetingBooking createBooking(MeetingBooking booking) {
+    public MeetingBooking createBooking(MeetingBooking booking, String authHeader) {
         if (!StringUtils.hasText(booking.getProfessorEmail()) || !StringUtils.hasText(booking.getStudentEmail())) {
             throw new IllegalArgumentException("professorEmail and studentEmail are required");
         }
-        
+
         // Fetch student name from profile if not provided or empty
         if (!StringUtils.hasText(booking.getStudentName())) {
             String fetchedName = fetchUserName(booking.getStudentEmail());
@@ -118,7 +118,7 @@ public class BookingService {
                 System.out.println("⚠️ Could not fetch student name for: " + booking.getStudentEmail());
             }
         }
-        
+
         // Fetch professor name from profile if not provided or empty
         if (!StringUtils.hasText(booking.getProfessorName())) {
             String fetchedName = fetchUserName(booking.getProfessorEmail());
@@ -127,7 +127,7 @@ public class BookingService {
                 System.out.println("✅ Set professor name from profile: " + fetchedName);
             }
         }
-        
+
         // Log what's being saved to database
         System.out.println("📝 Saving booking to database:");
         System.out.println("   - Professor Email: " + booking.getProfessorEmail());
@@ -137,29 +137,30 @@ public class BookingService {
         System.out.println("   - Title: " + booking.getTitle());
         System.out.println("   - Start: " + booking.getStartIso());
         System.out.println("   - End: " + booking.getEndIso());
-        
+
         booking.setStatus("BOOKED");
         booking.setCreatedAt(Instant.now());
         booking.setUpdatedAt(Instant.now());
+
+        // Save booking
         MeetingBooking saved = repository.save(booking);
-        
         System.out.println("✅ Booking saved with ID: " + saved.getId());
 
         // Send email notifications to both professor and student via email microservice
         try {
             System.out.println("📧 Sending booking emails via email service");
             emailClient.sendBookingEmails(
-                    booking.getProfessorEmail(),
-                    booking.getProfessorName(),
-                    booking.getStudentEmail(),
-                    booking.getStudentName(),
-                    StringUtils.hasText(booking.getTitle()) ? booking.getTitle() : "Meeting",
-                    booking.getDescription(),
-                    booking.getLocation(),
-                    booking.getStartIso(),
-                    booking.getEndIso()
+                    saved.getProfessorEmail(),
+                    saved.getProfessorName(),
+                    saved.getStudentEmail(),
+                    saved.getStudentName(),
+                    StringUtils.hasText(saved.getTitle()) ? saved.getTitle() : "Meeting",
+                    saved.getDescription(),
+                    saved.getLocation(),
+                    saved.getStartIso(),
+                    saved.getEndIso()
             );
-            System.out.println("✅ Booking emails sent successfully to both professor and student");
+           
         } catch (Exception e) {
             System.err.println("❌ Error sending booking emails: " + e.getMessage());
             e.printStackTrace();
@@ -167,8 +168,8 @@ public class BookingService {
 
         // Create event in calendar-service for the professor and store event id
         try {
-            System.out.println("📅 Creating calendar event for professor: " + booking.getProfessorEmail());
-            String professorEventId = calendarClient.createProfessorEvent(booking.getProfessorEmail(), booking);
+            System.out.println("📅 Creating calendar event for professor: " + saved.getProfessorEmail());
+            String professorEventId = calendarClient.createProfessorEvent(saved.getProfessorEmail(), saved, authHeader);
             if (professorEventId != null && !professorEventId.isBlank()) {
                 saved.setProfessorCalendarEventId(professorEventId);
                 saved = repository.save(saved);
@@ -183,8 +184,8 @@ public class BookingService {
 
         // Create event in calendar-service for the student and store event id
         try {
-            System.out.println("📅 Creating calendar event for student: " + booking.getStudentEmail());
-            String studentEventId = calendarClient.createStudentEvent(booking.getStudentEmail(), booking);
+            System.out.println("📅 Creating calendar event for student: " + saved.getStudentEmail());
+            String studentEventId = calendarClient.createStudentEvent(saved.getStudentEmail(), saved, authHeader);
             if (studentEventId != null && !studentEventId.isBlank()) {
                 saved.setStudentCalendarEventId(studentEventId);
                 saved = repository.save(saved);
@@ -197,8 +198,9 @@ public class BookingService {
             e.printStackTrace();
         }
 
-        System.out.println("📝 Final booking state - Professor Event ID: " + saved.getProfessorCalendarEventId() + 
-                          ", Student Event ID: " + saved.getStudentCalendarEventId());
+        System.out.println("📝 Final booking state - Professor Event ID: " + saved.getProfessorCalendarEventId() +
+                ", Student Event ID: " + saved.getStudentCalendarEventId());
+
         return saved;
     }
 
@@ -214,14 +216,15 @@ public class BookingService {
         return repository.findByProfessorEmailOrderByStartIsoDesc(professorEmail);
     }
 
-    public boolean cancelBooking(String id, String reason) {
+    public boolean cancelBooking(String id, String reason, String authHeader) {
+
         Optional<MeetingBooking> opt = repository.findById(id);
         if (opt.isEmpty()) return false;
         MeetingBooking booking = opt.get();
         booking.setStatus("CANCELLED");
         booking.setUpdatedAt(Instant.now());
         repository.save(booking);
-        
+
         // Send cancellation emails to both professor and student via email microservice
         try {
             System.out.println("📧 Sending cancellation emails via email service");
@@ -232,7 +235,7 @@ public class BookingService {
                     booking.getStudentName(),
                     reason
             );
-            System.out.println("✅ Cancellation emails sent successfully to both professor and student");
+         
         } catch (Exception e) {
             System.err.println("❌ Error sending cancellation emails: " + e.getMessage());
             e.printStackTrace();
@@ -241,7 +244,12 @@ public class BookingService {
         try {
             if (booking.getProfessorCalendarEventId() != null && !booking.getProfessorCalendarEventId().isBlank()) {
                 System.out.println("🗑️ Deleting professor calendar event: " + booking.getProfessorCalendarEventId());
-                calendarClient.cancelProfessorEvent(booking.getProfessorCalendarEventId(), booking.getProfessorEmail(), reason, booking.getStudentEmail());
+                calendarClient.cancelProfessorEvent(booking.getProfessorCalendarEventId(),
+                                   booking.getProfessorEmail(),
+                                   reason,
+                                   booking.getStudentEmail(),
+                                   authHeader);
+
                 System.out.println("✅ Professor calendar event deleted successfully");
             } else {
                 System.out.println("⚠️ No professor calendar event ID found, skipping deletion");
@@ -250,12 +258,16 @@ public class BookingService {
             System.err.println("❌ Error cancelling professor calendar event: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         // Cancel event in calendar-service for student if it exists
         try {
             if (booking.getStudentCalendarEventId() != null && !booking.getStudentCalendarEventId().isBlank()) {
                 System.out.println("🗑️ Deleting student calendar event: " + booking.getStudentCalendarEventId());
-                calendarClient.cancelStudentEvent(booking.getStudentCalendarEventId(), booking.getStudentEmail(), reason);
+                calendarClient.cancelStudentEvent(booking.getStudentCalendarEventId(),
+                                  booking.getStudentEmail(),
+                                  reason,
+                                  authHeader);
+
                 System.out.println("✅ Student calendar event deleted successfully");
             } else {
                 System.out.println("⚠️ No student calendar event ID found, skipping deletion");
@@ -264,9 +276,7 @@ public class BookingService {
             System.err.println("❌ Error cancelling student calendar event: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return true;
     }
 }
-
-

@@ -16,12 +16,23 @@ public class EmailClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${email.service.url:http://localhost:8086}")
+    // default points to docker service hostname (not localhost)
+    @Value("${email.service.url:http://email-service:8086}")
     private String emailServiceUrl;
 
-    public void sendBookingEmails(String professorEmail, String professorName, String studentEmail, 
-                                 String studentName, String meetingTitle, String description, 
+    // Backwards-compatible wrapper (no auth)
+    public void sendBookingEmails(String professorEmail, String professorName, String studentEmail,
+                                 String studentName, String meetingTitle, String description,
                                  String location, String startTime, String endTime) {
+        sendBookingEmails(professorEmail, professorName, studentEmail, studentName,
+                meetingTitle, description, location, startTime, endTime, null);
+    }
+
+    // New signature that accepts auth header
+    public void sendBookingEmails(String professorEmail, String professorName, String studentEmail,
+                                 String studentName, String meetingTitle, String description,
+                                 String location, String startTime, String endTime,
+                                 String authHeader) {
         Map<String, Object> body = new HashMap<>();
         body.put("professorEmail", professorEmail);
         body.put("professorName", professorName);
@@ -35,6 +46,9 @@ public class EmailClient {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        if (authHeader != null && !authHeader.isBlank()) {
+            headers.add("Authorization", authHeader);
+        }
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
         String url = emailServiceUrl + "/email-api/booking";
@@ -52,8 +66,15 @@ public class EmailClient {
         }
     }
 
-    public void sendCancellationEmails(String professorEmail, String professorName, String studentEmail, 
-                                      String studentName, String reason) {
+    // Backwards-compatible wrapper (no auth)
+    public void sendCancellationEmails(String professorEmail, String professorName, String studentEmail,
+                                       String studentName, String reason) {
+        sendCancellationEmails(professorEmail, professorName, studentEmail, studentName, reason, null);
+    }
+
+    // New signature that accepts auth header
+    public void sendCancellationEmails(String professorEmail, String professorName, String studentEmail,
+                                       String studentName, String reason, String authHeader) {
         Map<String, Object> body = new HashMap<>();
         body.put("professorEmail", professorEmail);
         body.put("professorName", professorName);
@@ -63,6 +84,9 @@ public class EmailClient {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        if (authHeader != null && !authHeader.isBlank()) {
+            headers.add("Authorization", authHeader);
+        }
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
         String url = emailServiceUrl + "/email-api/cancellation";
@@ -80,4 +104,3 @@ public class EmailClient {
         }
     }
 }
-

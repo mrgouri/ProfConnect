@@ -1,0 +1,831 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Book Meeting</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary-color: #8b5cf6;
+      --accent-color: #ec4899;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --card-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ffffff;
+      min-height: 100vh;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #0f172a;
+    }
+
+    .navbar {
+      background: rgba(248, 250, 252, 0.98) !important;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04);
+    }
+
+    .navbar .btn-outline-secondary {
+      background: transparent;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      color: #0f172a;
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.5rem;
+      background: var(--card-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeInUp {
+      from { 
+        opacity: 0; 
+        transform: translateY(40px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    .page-header {
+      background: rgba(248, 250, 252, 0.98);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12));
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    .professor-info {
+      color: #64748b;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-card {
+      background: rgba(248, 250, 252, 0.98);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+    }
+
+    .form-card h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #1e293b;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+      display: block;
+      font-size: 0.875rem;
+    }
+
+    .form-control, .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid rgba(15, 23, 42, 0.1);
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      transition: all 0.3s ease;
+      background: #ffffff;
+    }
+
+    .form-control:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-control::placeholder {
+      color: #94a3b8;
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    #timeSlotsSection {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .time-slot {
+      display: inline-block;
+      padding: 0.625rem 1.25rem;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+      background: #ffffff;
+      border: 2px solid rgba(15, 23, 42, 0.1);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 0.875rem;
+    }
+
+    .time-slot:hover {
+      border-color: var(--primary-color);
+      background: rgba(99, 102, 241, 0.05);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .time-slot.selected {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-color: transparent;
+      color: #ffffff;
+    }
+
+    .time-slot.disabled {
+      background: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border: none;
+      color: #ffffff;
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.875rem 2rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+      filter: brightness(1.05);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-outline-secondary {
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      color: #1e293b;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.625rem 1.25rem;
+    }
+
+    .btn-outline-secondary:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.3);
+      color: #6366f1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .alert {
+      border-radius: 10px;
+      border: none;
+      padding: 1rem 1.25rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .alert-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .alert-info {
+      background: rgba(99, 102, 241, 0.1);
+      color: #6366f1;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .alert-info strong {
+      color: #4f46e5;
+    }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 2rem;
+    }
+
+
+    body, body * {
+      color: #000 !important;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">ProfConnect</a>
+      <div class="d-flex align-items-center">
+        <a href="/student.html" class="btn btn-outline-secondary btn-sm me-2">← Back</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="dashboard-container">
+    <div id="pageHeader" class="page-header">
+      <h1>Book a Meeting</h1>
+      <div class="professor-info" id="professorInfo">Loading...</div>
+    </div>
+
+    <div id="alertContainer"></div>
+
+    <div class="form-card" style="max-width: 800px; margin: 0 auto;">
+      <h3>Meeting Details</h3>
+      <form id="bookingForm">
+        <div class="form-group">
+          <label class="form-label">Meeting Title *</label>
+          <input type="text" class="form-control" id="meetingTitle" placeholder="e.g., Office Hours Consultation" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" id="meetingDescription" placeholder="Brief description of the meeting topic..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Date *</label>
+          <input type="date" class="form-control" id="meetingDate" required min="">
+        </div>
+
+        <div id="timeSlotsSection" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Available Time Slots *</label>
+            <div id="timeSlots" style="margin-top: 0.5rem;"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Selected Date & Time</label>
+            <div style="padding: 0.875rem 1rem; background: #f8fafc; border: 2px solid rgba(15, 23, 42, 0.1); border-radius: 10px;">
+              <div id="selectedSlot" style="color: #64748b; font-weight: 500;">Please select a time slot</div>
+            </div>
+          </div>
+
+          <!-- <div class="form-group">
+            <label class="form-label">Location/Meeting Link</label>
+            <input type="text" class="form-control" id="meetingLocation" placeholder="Room number, building, or online meeting link">
+          </div> -->
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">
+          Book Meeting
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/';
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const professorEmail = params.get('email');
+    let professorData = null;
+    let selectedDate = null;
+    let selectedStartTime = null;
+    let selectedEndTime = null;
+    let busySlotsForDate = [];
+    let calendarLinked = false;
+
+    if (!professorEmail) {
+      alert('No professor email provided');
+      window.location.href = '/student.html';
+    }
+
+    const calendarApiBase = "/calendar-api";
+    const meetingApiBase = "/booking-api";
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.addEventListener('DOMContentLoaded', () => {
+      const dateInput = document.getElementById('meetingDate');
+      if (dateInput) {
+        dateInput.setAttribute('min', today);
+      }
+      checkCalendarStatus();
+    });
+
+    async function checkCalendarStatus() {
+      try {
+        const res = await fetch(`${calendarApiBase}/status?email=${encodeURIComponent(professorEmail)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          calendarLinked = data.connected || false;
+          
+          if (!calendarLinked) {
+            showAlert('⚠️ This professor has not connected their calendar yet. All time slots will be shown as available. Please contact the professor to connect their calendar for accurate availability.', 'info');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking calendar status:', error);
+        // Continue anyway - will show all slots as available
+      }
+    }
+
+    async function loadProfessorInfo() {
+      try {
+        let res;
+        try {
+          res = await fetch(`http://localhost:8083/profiles/by-email?email=${encodeURIComponent(professorEmail)}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (!res.ok) {
+            res = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(professorEmail)}`, {
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+          }
+        } catch (err) {
+          res = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(professorEmail)}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+        }
+
+        if (res.ok) {
+          const j = await res.json();
+          professorData = j.user || {};
+          document.getElementById('professorInfo').textContent = `Booking with ${professorData.name || professorEmail}`;
+        }
+      } catch (error) {
+        console.error('Error loading professor info:', error);
+      }
+    }
+
+    async function loadBusySlotsForDate(date) {
+      // If calendar not linked, return empty array (all slots available)
+      if (!calendarLinked) {
+        return [];
+      }
+
+      try {
+        // Fetch events for the professor
+        const res = await fetch(`${calendarApiBase}/events?email=${encodeURIComponent(professorEmail)}&max=100`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) {
+          // Check if it's a "no calendar linked" error
+          const errorText = await res.text();
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch (e) {
+            errorData = { message: errorText };
+          }
+          
+          if (errorData.message && errorData.message.includes('No calendar linked')) {
+            calendarLinked = false;
+            return [];
+          }
+          
+          console.error('Failed to load calendar events');
+          return [];
+        }
+        
+        const events = await res.json();
+        
+        // Check if response is an error object or not an array
+        if (!Array.isArray(events)) {
+          if (events.message && events.message.includes('No calendar linked')) {
+            calendarLinked = false;
+            return [];
+          }
+          console.error('Unexpected response format:', events);
+          return [];
+        }
+        
+        console.log('✅ Fetched', events.length, 'events from backend for date:', date);
+        
+        // Backend returns: [{title: string, start: "RFC3339 string", end: "RFC3339 string"}]
+        // Example: [{title: "Meeting", start: "2025-11-05T10:00:00Z", end: "2025-11-05T11:00:00Z"}]
+        // Filter events for the selected date
+        const busySlots = events.map(ev => {
+          // Backend provides start and end as direct ISO/RFC3339 strings
+          const startStr = ev.start;
+          const endStr = ev.end || ev.start; // Use start as fallback for end
+          
+          if (!startStr) {
+            console.warn('Event missing start time:', ev);
+            return null;
+          }
+          
+          try {
+            const startDate = new Date(startStr);
+            const endDate = endStr ? new Date(endStr) : new Date(startDate.getTime() + 3600000); // Default 1 hour
+            
+            if (isNaN(startDate.getTime())) {
+              console.warn('Invalid start date in event:', ev);
+              return null;
+            }
+            
+            return {
+              start: startDate,
+              end: endDate
+            };
+          } catch (error) {
+            console.warn('Error parsing event dates:', error, ev);
+            return null;
+          }
+        }).filter(slot => {
+          if (!slot) return false;
+          
+          // Only include events that overlap with the selected date
+          try {
+            const slotDate = slot.start.toISOString().split('T')[0];
+            return slotDate === date;
+          } catch (error) {
+            console.warn('Error filtering event by date:', error);
+            return false;
+          }
+        });
+        
+        console.log('📅 Found', busySlots.length, 'busy slots for date', date);
+        return busySlots;
+      } catch (error) {
+        console.error('Error loading busy slots:', error);
+        return [];
+      }
+    }
+
+    function generateTimeSlots(date, busySlots) {
+      const slots = [];
+      const selectedDateObj = new Date(date + 'T00:00:00');
+      const now = new Date();
+      
+      // Generate slots from 9 AM to 5 PM, every 30 minutes
+      for (let hour = 9; hour < 17; hour++) {
+        for (let minute = 0; minute < 60; minute += 30) {
+          const slotStart = new Date(selectedDateObj);
+          slotStart.setHours(hour, minute, 0, 0);
+          
+          const slotEnd = new Date(slotStart);
+          slotEnd.setMinutes(slotEnd.getMinutes() + 30);
+
+          // Check if this slot conflicts with busy times
+          const isBusy = busySlots.some(busy => {
+            return (slotStart >= busy.start && slotStart < busy.end) ||
+                   (slotEnd > busy.start && slotEnd <= busy.end) ||
+                   (slotStart <= busy.start && slotEnd >= busy.end);
+          });
+
+          // Don't show past slots
+          if (slotStart < now) continue;
+
+          const timeStr = slotStart.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+          });
+
+          slots.push({
+            start: slotStart.toISOString(),
+            end: slotEnd.toISOString(),
+            display: timeStr,
+            busy: isBusy
+          });
+        }
+      }
+
+      return slots;
+    }
+
+    async function loadTimeSlotsForDate(date) {
+      const slotsContainer = document.getElementById('timeSlots');
+      const timeSlotsSection = document.getElementById('timeSlotsSection');
+      const submitBtn = document.getElementById('submitBtn');
+      
+      // Show time slots section
+      timeSlotsSection.style.display = 'block';
+      slotsContainer.innerHTML = '<div class="spinner-border text-primary" role="status"></div>';
+      
+      // Reset selection
+      selectedStartTime = null;
+      selectedEndTime = null;
+      document.getElementById('selectedSlot').textContent = 'Please select a time slot';
+      submitBtn.style.display = 'none';
+
+      // Load busy slots for this date
+      busySlotsForDate = await loadBusySlotsForDate(date);
+      
+      // Generate available slots
+      const slots = generateTimeSlots(date, busySlotsForDate);
+
+      if (slots.length === 0) {
+        slotsContainer.innerHTML = '<p class="text-muted">No available slots for this date. Please select another date.</p>';
+        return;
+      }
+
+      const availableSlots = slots.filter(s => !s.busy);
+      
+      if (availableSlots.length === 0 && calendarLinked) {
+        slotsContainer.innerHTML = '<p class="text-muted">All time slots are booked for this date. Please select another date.</p>';
+        return;
+      }
+      
+      // Show note if calendar not linked
+      let noteHtml = '';
+      if (!calendarLinked) {
+        noteHtml = '<div class="alert alert-info" style="margin-bottom: 1rem; padding: 0.75rem 1rem; font-size: 0.875rem;"><strong>Note:</strong> Professor\'s calendar is not connected. All slots shown are potentially available. Please confirm with the professor before booking.</div>';
+      }
+
+      let html = noteHtml;
+      slots.forEach(slot => {
+        if (slot.busy && calendarLinked) {
+          html += `<span class="time-slot disabled">${slot.display} (Busy)</span>`;
+        } else {
+          html += `<span class="time-slot" data-start="${slot.start}" data-end="${slot.end}">${slot.display}</span>`;
+        }
+      });
+
+      slotsContainer.innerHTML = html;
+
+      // Add click handlers
+      document.querySelectorAll('.time-slot:not(.disabled)').forEach(el => {
+        el.addEventListener('click', function() {
+          document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+          this.classList.add('selected');
+          
+          selectedStartTime = this.getAttribute('data-start');
+          selectedEndTime = this.getAttribute('data-end');
+          
+          const startDate = new Date(selectedStartTime);
+          const timeStr = startDate.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+          });
+          const dateStr = startDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+          
+          document.getElementById('selectedSlot').innerHTML = `
+            <strong>${dateStr}</strong><br>
+            <span>${timeStr}</span>
+          `;
+          
+          // Show submit button
+          submitBtn.style.display = 'block';
+        });
+      });
+    }
+
+    function showAlert(message, type = 'info') {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertClass = `alert-${type}`;
+      alertContainer.innerHTML = `
+        <div class="alert ${alertClass}" role="alert">
+          ${message}
+        </div>
+      `;
+      
+      setTimeout(() => {
+        alertContainer.innerHTML = '';
+      }, 5000);
+    }
+
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!selectedStartTime || !selectedEndTime) {
+        showAlert('Please select a time slot from the calendar', 'danger');
+        return;
+      }
+
+      const title = document.getElementById('meetingTitle').value.trim();
+      const description = document.getElementById('meetingDescription').value.trim();
+      // const location = document.getElementById('meetingLocation').value.trim();
+
+      if (!title) {
+        showAlert('Please enter a meeting title', 'danger');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Booking...';
+
+      try {
+        // Fetch student name from profile using student email
+        const studentEmail = localStorage.getItem('userEmail') || '';
+        let studentName = '';
+        
+        if (studentEmail) {
+          try {
+            // Try to fetch student profile to get the name
+            let studentRes;
+            try {
+              studentRes = await fetch(`/profiles-api/by-email?email=${encodeURIComponent(studentEmail)}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+              });
+              if (!studentRes.ok) {
+                studentRes = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(studentEmail)}`, {
+                  headers: { 'Authorization': 'Bearer ' + token }
+                });
+              }
+            } catch (err) {
+              studentRes = await fetch(`/admin-api/users/by-email?email=${encodeURIComponent(studentEmail)}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+              });
+            }
+            
+            if (studentRes && studentRes.ok) {
+              const studentData = await studentRes.json();
+              const student = studentData.user || {};
+              studentName = student.name || student.firstName + (student.lastName ? ' ' + student.lastName : '') || '';
+              console.log('✅ Fetched student name from profile:', studentName);
+            }
+          } catch (err) {
+            console.warn('⚠️ Could not fetch student profile, using fallback:', err);
+            // Fallback to localStorage if profile fetch fails
+            studentName = localStorage.getItem('userName') || '';
+          }
+        }
+        
+        // Create booking via meeting-service; it will call calendar-service internally
+        const bookingData = {
+          professorEmail: professorEmail,
+          professorName: (professorData && professorData.name) ? professorData.name : '',
+          studentEmail: studentEmail,
+          studentName: studentName,
+          title: title,
+          description: description || 'Meeting with professor',
+          // location: location || '',
+          startIso: selectedStartTime,
+          endIso: selectedEndTime
+        };
+        
+        console.log('📝 Creating booking with data:', {
+          ...bookingData,
+          startIso: bookingData.startIso,
+          endIso: bookingData.endIso
+        });
+        
+        const response = await fetch(`${meetingApiBase}/bookings`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(bookingData)
+        });
+
+        const data = await response.json().catch(() => ({}));
+        console.log('Booking response:', data);
+        if (response.ok) {
+          let successMsg = '✅ Meeting booked successfully!';
+          successMsg += ' The event has been added to both your Google Calendar and the professor\'s Google Calendar.';
+          successMsg += ' It will also appear under Upcoming Meetings.';
+          successMsg += ' Email notifications have been sent.';
+          showAlert(successMsg, 'success');
+          
+          console.log('✅ Booking successful, event should now be in Google Calendar');
+          console.log('Google Calendar event ID:', data.professorCalendarEventId);
+          
+          // Clear form
+          document.getElementById('bookingForm').reset();
+          document.getElementById('timeSlotsSection').style.display = 'none';
+          document.getElementById('submitBtn').style.display = 'none';
+          document.getElementById('selectedSlot').textContent = 'Please select a time slot';
+          selectedStartTime = null;
+          selectedEndTime = null;
+          selectedDate = null;
+          
+          // Set min date again
+          const todayDate = new Date().toISOString().split('T')[0];
+          document.getElementById('meetingDate').setAttribute('min', todayDate);
+          
+          // Reload busy slots for current date if selected
+          if (selectedDate && calendarLinked) {
+            loadTimeSlotsForDate(selectedDate);
+          }
+          
+          // Show success message for a bit longer, then redirect
+          setTimeout(() => {
+            window.location.href = `/student.html`;
+          }, 3000);
+        } else {
+          let errorMsg = 'Failed to book meeting';
+          
+          // Try to parse error message
+          if (data && data.message) {
+            errorMsg = data.message;
+          } else if (data && data.error) {
+            errorMsg = data.error;
+          } else if (typeof data === 'string') {
+            errorMsg = data;
+          }
+          
+          showAlert(`❌ ${errorMsg}`, 'danger');
+          console.error('Failed to book meeting:', data);
+        }
+      } catch (error) {
+        console.error('Booking error:', error);
+        showAlert(`❌ Error: ${error.message}. Please check if the professor has connected their calendar.`, 'danger');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Book Meeting';
+      }
+    });
+
+    // Handle date selection
+    document.getElementById('meetingDate').addEventListener('change', function(e) {
+      const date = e.target.value;
+      if (date) {
+        selectedDate = date;
+        loadTimeSlotsForDate(date);
+      } else {
+        document.getElementById('timeSlotsSection').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'none';
+      }
+    });
+
+    // Initialize
+    loadProfessorInfo();
+  </script>
+</body>
+</html>
+

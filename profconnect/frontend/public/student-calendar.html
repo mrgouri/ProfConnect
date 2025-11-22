@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProfConnect Calendar</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .calendar-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .controls h2 {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .btn {
+      border-radius: 8px;
+    }
+
+    .spinner-border {
+      width: 2rem;
+      height: 2rem;
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 250px;
+    }
+  </style>
+</head>
+<body>
+  <div class="calendar-container">
+    <div class="controls">
+      <h2>My Calendar</h2>
+      <div>
+        <button id="refreshEvents" class="btn btn-primary me-2">
+          Refresh Events
+        </button>
+        <button id="viewGoogle" class="btn btn-outline-secondary">
+          Open in Google Calendar
+        </button>
+      </div>
+    </div>
+
+    <div id="calendar"></div>
+    <div id="loading" class="loading d-none">
+      <div class="spinner-border text-primary" role="status"></div>
+      <span class="ms-2 text-secondary">Loading events...</span>
+    </div>
+
+    <div id="eventList" class="mt-4"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/';
+    }
+    
+    // Extract email from multiple sources: URL params, localStorage, or JWT token
+    const params = new URLSearchParams(window.location.search);
+    let email = params.get("email") || localStorage.getItem("userEmail");
+    
+    // If email not found, try to extract from JWT token
+    if (!email && token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        email = payload.sub || payload.email || null;
+        if (email) {
+          localStorage.setItem('userEmail', email);
+        }
+      } catch (e) {
+        console.warn("Could not extract email from token:", e);
+      }
+    }
+      
+    const calendarApiBase = "/calendar-api";
+    const meetingApiBase = "/booking-api";
+    let calendar;
+
+    async function initCalendar() {
+      if (!email) {
+        alert("No email found in localStorage. Please sign in again.");
+        return;
+      }
+      console.log("📅 Initializing calendar for email:", email);
+      document.getElementById("loading").classList.remove("d-none");
+
+      let events = [];
+      
+      // Fetch from Google Calendar if linked
+      try {
+        const url = `${calendarApiBase}/events?email=${encodeURIComponent(email)}&max=250`;
+        console.log("🔍 Fetching events from:", url);
+        
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          const calendarEvents = await res.json();
+          if (Array.isArray(calendarEvents)) {
+            events = calendarEvents;
+            console.log("✅ Calendar events fetched:", events.length);
+          }
+        } else {
+          console.warn("⚠️ Calendar not linked or error fetching:", res.status);
+        }
+      } catch (error) {
+        console.warn("⚠️ Error fetching calendar events:", error);
+      }
+      
+      // Also fetch bookings from meeting-service and convert to calendar format
+      try {
+        const bookingsRes = await fetch(`${meetingApiBase}/bookings?studentEmail=${encodeURIComponent(email)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (bookingsRes.ok) {
+          const bookings = await bookingsRes.json();
+          console.log("✅ Bookings fetched:", bookings.length);
+          
+          // Convert bookings to calendar event format
+          const bookingEvents = (bookings || [])
+            .filter(b => b.status === 'BOOKED' && b.startIso && b.endIso)
+            .map(b => ({
+              title: b.title || 'Meeting',
+              start: b.startIso,
+              end: b.endIso,
+              description: b.description || '',
+              location: b.location || '',
+              id: b.id,
+              source: 'booking'
+            }));
+          
+          // Merge with calendar events, avoiding duplicates
+          const existingStartTimes = new Set(events.map(e => e.start));
+          bookingEvents.forEach(be => {
+            if (!existingStartTimes.has(be.start)) {
+              events.push(be);
+            }
+          });
+          
+          console.log("✅ Total events (calendar + bookings):", events.length);
+        }
+      } catch (error) {
+        console.warn("⚠️ Error fetching bookings:", error);
+      }
+      
+      // Log each event for debugging
+      if (Array.isArray(events) && events.length > 0) {
+        events.forEach((ev, idx) => {
+          console.log(`Event ${idx + 1}:`, {
+            title: ev.title || ev.summary,
+            start: ev.start,
+            end: ev.end,
+            source: ev.source || 'calendar',
+            raw: ev
+          });
+        });
+      } else {
+        console.log("📊 No events found");
+      }
+
+      document.getElementById("loading").classList.add("d-none");
+
+        const allEvents = normalizeEvents(events);
+        console.log("📋 Normalized events:", allEvents);
+        console.log("📋 Number of normalized events:", allEvents.length);
+        
+        const upcomingEvents = filterUpcomingEvents(allEvents);
+        console.log("⏰ Upcoming events:", upcomingEvents);
+        console.log("⏰ Number of upcoming events:", upcomingEvents.length);
+
+        // Show all events in calendar
+        renderCalendar(allEvents);
+
+        // Show only upcoming in the list
+        renderTextList(upcomingEvents);
+      
+    }
+
+    // ✅ Normalize events for both calendar and list
+    // Backend returns: [{title: string, start: "RFC3339 string", end: "RFC3339 string", allDay: boolean}]
+    function normalizeEvents(eventsData) {
+      if (!Array.isArray(eventsData)) {
+        console.warn("⚠️ Events data is not an array:", eventsData);
+        return [];
+      }
+      
+      return eventsData.map((ev, idx) => {
+        // Backend provides start and end as direct ISO/RFC3339 strings
+        const startStr = ev.start;
+        const endStr = ev.end || ev.start;
+        const isAllDay = ev.allDay === true; // Use allDay flag from backend
+        
+        try {
+          if (!startStr) {
+            console.warn(`⚠️ Event ${idx} has no start time:`, ev);
+            return null;
+          }
+          
+          const start = new Date(startStr);
+          const end = endStr ? new Date(endStr) : new Date(start.getTime() + 3600000);
+          
+          // Validate dates
+          if (isNaN(start.getTime())) {
+            console.warn(`⚠️ Event ${idx} has invalid start date:`, startStr, ev);
+            return null;
+          }
+          
+          // For all-day events, extract date part directly from RFC3339 string to avoid timezone issues
+          let normalizedStart, normalizedEnd;
+          if (isAllDay) {
+            // Extract date part (YYYY-MM-DD) from RFC3339 string
+            normalizedStart = startStr.split('T')[0];
+            normalizedEnd = endStr ? endStr.split('T')[0] : normalizedStart;
+          } else {
+            normalizedStart = start.toISOString();
+            normalizedEnd = end.toISOString();
+          }
+          
+          const normalized = {
+            title: ev.title || ev.summary || "No Title",
+            start: normalizedStart,
+            end: normalizedEnd,
+            allDay: isAllDay, // Use allDay flag from backend
+            description: ev.description || "",
+          };
+          
+          console.log(`✅ Normalized event ${idx + 1}:`, normalized);
+          return normalized;
+        } catch (e) {
+          console.warn(`❌ Error parsing event ${idx}:`, ev, e);
+          return null;
+        }
+      }).filter(ev => ev !== null);
+    }
+
+    // ✅ Filter only future (upcoming) events
+    function filterUpcomingEvents(eventsData) {
+      const now = new Date();
+      console.log("🕐 Current time for filtering:", now.toISOString());
+      
+      const filtered = eventsData.filter(e => {
+        if (!e || !e.start) {
+          console.warn("⚠️ Event missing start time:", e);
+          return false;
+        }
+        
+        const startDate = new Date(e.start);
+        const isUpcoming = startDate >= now;
+        
+        console.log(`📅 Event "${e.title}": ${startDate.toISOString()} - ${isUpcoming ? 'UPCOMING' : 'PAST'}`);
+        return isUpcoming;
+      }).sort((a, b) => new Date(a.start) - new Date(b.start));
+      
+      console.log(`✅ Filtered ${filtered.length} upcoming events from ${eventsData.length} total`);
+      return filtered;
+    }
+
+    // ✅ Render all events (both timed & all-day)
+    function renderCalendar(eventsData) {
+      const calendarEl = document.getElementById("calendar");
+
+      if (calendar) calendar.destroy();
+
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        height: "auto",
+        headerToolbar: {
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth,timeGridWeek,timeGridDay",
+        },
+        slotMinTime: "06:00:00",
+        slotMaxTime: "22:00:00",
+        events: eventsData,
+        timeZone: 'local', // Use local timezone
+        eventTimeFormat: { hour: "2-digit", minute: "2-digit", hour12: true },
+        eventDisplay: 'block',
+        eventDidMount: function(info) {
+          console.log("📌 Event rendered on calendar:", info.event.title, info.event.start);
+        },
+        eventClick: function (info) {
+          const start = info.event.start
+            ? new Date(info.event.start).toLocaleString()
+            : "N/A";
+          const end = info.event.end
+            ? new Date(info.event.end).toLocaleString()
+            : "N/A";
+          alert(`📅 ${info.event.title}\n🕒 ${start} - ${end}`);
+        },
+      });
+
+      setTimeout(() => calendar.render(), 100);
+    }
+
+    // ✅ Render text list of upcoming events
+    function renderTextList(eventsData) {
+      const listDiv = document.getElementById("eventList");
+      if (!listDiv) return;
+
+      if (!eventsData || eventsData.length === 0) {
+        listDiv.innerHTML = "<p class='text-muted'>No upcoming events.</p>";
+        return;
+      }
+
+      listDiv.innerHTML = `
+        <h5 class="mt-4">📋 Upcoming Events</h5>
+        <ul class="list-group">
+          ${eventsData
+            .map(
+              e => `
+              <li class="list-group-item">
+                <strong>${e.title}</strong>
+                <span class="text-muted">
+                  (${new Date(e.start).toLocaleString()})
+                </span>
+              </li>`
+            )
+            .join("")}
+        </ul>
+      `;
+    }
+
+    async function refreshCalendar() {
+      if (!email) {
+        console.warn("⚠️ No email available for refresh");
+        return;
+      }
+      
+      console.log("🔄 Refreshing calendar for:", email);
+      document.getElementById("loading").classList.remove("d-none");
+      
+      let events = [];
+      
+      // Fetch from Google Calendar if linked
+      try {
+        const url = `${calendarApiBase}/events?email=${encodeURIComponent(email)}&max=250`;
+        console.log("🔍 Refresh: Fetching from:", url);
+        
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` },
+          cache: 'no-cache'
+        });
+        
+        if (res.ok) {
+          const calendarEvents = await res.json();
+          if (Array.isArray(calendarEvents)) {
+            events = calendarEvents;
+            console.log("✅ Refresh: Calendar events fetched:", events.length);
+          }
+        } else {
+          console.warn("⚠️ Refresh: Calendar not linked or error:", res.status);
+        }
+      } catch (error) {
+        console.warn("⚠️ Refresh: Error fetching calendar events:", error);
+      }
+      
+      // Also fetch bookings from meeting-service
+      try {
+        const bookingsRes = await fetch(`${meetingApiBase}/bookings?studentEmail=${encodeURIComponent(email)}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+          cache: 'no-cache'
+        });
+        
+        if (bookingsRes.ok) {
+          const bookings = await bookingsRes.json();
+          const bookingEvents = (bookings || [])
+            .filter(b => b.status === 'BOOKED' && b.startIso && b.endIso)
+            .map(b => ({
+              title: b.title || 'Meeting',
+              start: b.startIso,
+              end: b.endIso,
+              description: b.description || '',
+              location: b.location || '',
+              id: b.id,
+              source: 'booking'
+            }));
+          
+          const existingStartTimes = new Set(events.map(e => e.start));
+          bookingEvents.forEach(be => {
+            if (!existingStartTimes.has(be.start)) {
+              events.push(be);
+            }
+          });
+          
+          console.log("✅ Refresh: Total events (calendar + bookings):", events.length);
+        }
+      } catch (error) {
+        console.warn("⚠️ Refresh: Error fetching bookings:", error);
+      }
+        
+        const allEvents = normalizeEvents(events);
+        console.log("✅ Refresh: Normalized events:", allEvents.length);
+        
+        const upcomingEvents = filterUpcomingEvents(allEvents);
+        console.log("✅ Refresh: Upcoming events:", upcomingEvents.length);
+        
+        // Update calendar - remove all and add fresh events
+        if (calendar) {
+          calendar.removeAllEvents();
+          // Add events one by one to ensure they're added
+          allEvents.forEach(event => {
+            calendar.addEvent(event);
+          });
+          calendar.refetchEvents();
+        } else {
+          renderCalendar(allEvents);
+        }
+        
+        // Update event list
+        renderTextList(upcomingEvents);
+        
+        document.getElementById("loading").classList.add("d-none");
+        console.log("✅ Calendar refresh complete");
+      
+    }
+    
+    document.getElementById("refreshEvents").onclick = refreshCalendar;
+    document.getElementById("viewGoogle").onclick = () =>
+      window.open("https://calendar.google.com", "_blank");
+
+    document.addEventListener("DOMContentLoaded", initCalendar);
+    
+    // Auto-refresh every 10 seconds to show new bookings (reduced from 30s for faster updates)
+    setInterval(() => {
+      refreshCalendar();
+    }, 10000);
+  </script>
+</body>
+</html>

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Professor Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     :root {
       --primary-color: #6366f1;
@@ -84,35 +85,51 @@
     }
 
     .btn-outline-secondary {
-      background: rgba(148, 163, 184, 0.1);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      color: #e2e8f0;
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      color: #1e293b;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: 12px;
       font-weight: 600;
-      backdrop-filter: blur(10px);
+      padding: 0.625rem 1.25rem;
     }
 
     .btn-outline-secondary:hover {
-      background: rgba(148, 163, 184, 0.2);
-      border-color: rgba(148, 163, 184, 0.4);
-      color: #f1f5f9;
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.3);
+      color: #6366f1;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
     }
 
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border: none;
+      color: #ffffff;
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.625rem 1.25rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+      filter: brightness(1.05);
+    }
+
     .btn-danger {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
+      background: #ef4444;
+      border: none;
+      color: #ffffff;
       font-weight: 600;
       border-radius: 12px;
+      padding: 0.5rem 1rem;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .btn-danger:hover {
-      background: var(--danger-color);
-      border-color: var(--danger-color);
+      background: #dc2626;
       color: white;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
@@ -395,6 +412,171 @@
     body, body * {
       color: #000 !important;
     }
+
+    .action-content h3 {
+      color: #1e293b !important;
+    }
+
+    .action-content p {
+      color: #64748b !important;
+    }
+
+    .feature-title {
+      color: #1e293b !important;
+    }
+
+    .feature-item-content h4 {
+      color: #1e293b !important;
+    }
+
+    .feature-item-content p {
+      color: #64748b !important;
+    }
+
+    /* Events Grid Layout */
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .event-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.25rem;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+      transition: all 0.2s ease;
+      border-left: 4px solid #6366f1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .event-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+    }
+
+    .event-card .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #1e293b;
+      line-height: 1.3;
+    }
+
+    .event-card .event-info {
+      font-size: 0.9rem;
+      color: #475569;
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+
+    .event-card .event-info strong {
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    .event-card .event-datetime {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 1rem;
+    }
+
+    .event-card .event-actions {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .event-card .btn-sm {
+      width: 100%;
+      font-size: 0.875rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .event-card .btn-sm:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      .events-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Toast Notifications */
+    .toast {
+      min-width: 300px;
+      max-width: 400px;
+    }
+
+    .toast-header {
+      font-weight: 600;
+    }
+
+    .toast-success .toast-header {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: #059669;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .toast-error .toast-header {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .toast-warning .toast-header {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+      border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .toast-info .toast-header {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: #2563eb;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .alert {
+      border-radius: 10px;
+      border: none;
+      padding: 0.875rem 1.25rem;
+      font-weight: 500;
+      margin-bottom: 0;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .feature-card {
+        padding: 1.25rem;
+      }
+
+      .feature-card .d-flex,
+      .feature-card [style*="flex"] {
+        flex-direction: column;
+      }
+
+      .feature-card .btn,
+      .feature-card a.btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -424,28 +606,24 @@
             <p>Update your information and settings</p>
           </div>
         </a>
-        <button id="editLocationAction" class="action-btn" style="
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  border-radius: 12px;
-  padding: 12px 20px;
-  cursor: pointer;
-  color: white;
-  font-size: 15px;
-  font-weight: 600;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  transition: all 0.3s ease;
-  width: fit-content;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-">
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-  </svg>
-  Edit Location
-</button>
+        <a href="/prof-calendar.html" class="action-btn">
+          <div class="action-icon primary">
+            📅
+          </div>
+          <div class="action-content">
+            <h3>Calendar Dashboard</h3>
+            <p>View and manage your calendar events</p>
+          </div>
+        </a>
+        <button id="editLocationAction" class="action-btn">
+          <div class="action-icon secondary">
+            📍
+          </div>
+          <div class="action-content">
+            <h3>Edit Location</h3>
+            <p>Update your office location</p>
+          </div>
+        </button>
       </div>
       <!-- Inline location editor (hidden by default) -->
       <div id="locEditorCard" style="display:none; margin-top:1rem;">
@@ -466,37 +644,75 @@
       </div>
     </div>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span class="stat-icon">📅</span>
-        <div class="stat-value">-</div>
-        <div class="stat-label">Upcoming Meetings</div>
-      </div>
-
-      <div class="stat-card">
-        <span class="stat-icon">✓</span>
-        <div class="stat-value">-</div>
-        <div class="stat-label">Completed</div>
-      </div>
-
-      <div class="stat-card">
-        <span class="stat-icon">👥</span>
-        <div class="stat-value">-</div>
-        <div class="stat-label">Students</div>
+    <div class="feature-card">
+      <h3 class="feature-title">Upcoming Meetings</h3>
+      <div id="upcomingEventsList" class="mt-3 events-grid">
+        <div class="text-muted">Loading upcoming events...</div>
       </div>
     </div>
 
-    
+    <div class="feature-card">
+      <h3 class="feature-title">Calendar Integration</h3>
+      <div id="calendarStatus" class="mb-3"></div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button id="authenticateCalendar" class="btn btn-primary">
+          Connect Google Calendar
+        </button>
+        <a href="/prof-calendar.html" class="btn btn-outline-secondary">View My Calendar</a>
+      </div>
+    </div>
   </main>
 
+  <!-- Toast Container -->
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div id="toastContainer"></div>
+  </div>
+
+  <!-- Cancel Meeting Modal -->
+  <div class="modal fade" id="cancelMeetingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Cancel Meeting</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to cancel this meeting?</p>
+          <div id="cancelMeetingInfo" class="mb-3 p-3 bg-light rounded"></div>
+          <div class="mb-3">
+            <label for="cancelReason" class="form-label">Reason for cancellation (optional):</label>
+            <textarea id="cancelReason" class="form-control" rows="3" placeholder="Enter reason for cancellation..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-danger" id="confirmCancelBtn">Cancel Meeting</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
+    function safeSetText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = (value === undefined || value === null) ? '' : String(value);
+    }
+    let userEmail = null;
     const token = localStorage.getItem('token');
     if (!token) {
       window.location.href = '/';
     } else {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        const userName = payload.sub || payload.email || 'Professor';
+        userEmail = payload.sub || payload.email || null;
+        if (userEmail) {
+          localStorage.setItem('userEmail', userEmail);
+        }
+        document.getElementById('welcome').innerText = `Hello ${userEmail || ''} (ROLE: ${payload.role || ''})`;
+        const userName = payload.name || payload.sub || payload.email || 'Professor';
+        if (userName) {
+          localStorage.setItem('userName', userName);
+        }
         const userRole = payload.role || 'User';
         
         document.getElementById('welcome').innerHTML = `
@@ -518,6 +734,68 @@
       window.location.href = '/';
     });
 
+    // Add this to your existing JavaScript
+    function checkCalendarAuth() {
+        const token = localStorage.getItem('token');
+        const email = localStorage.getItem('userEmail');
+        
+        fetch(`/calendar-api/status?email=${email}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest',
+              'Authorization': `Bearer ${token}`,
+             }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const statusDiv = document.getElementById('calendarStatus');
+            if (data.connected) {
+                statusDiv.innerHTML = '<div class="alert alert-success">Calendar Connected</div>';
+                document.getElementById('authenticateCalendar').style.display = 'none';
+            } else {
+                statusDiv.innerHTML = '<div class="alert alert-warning">Calendar Not Connected</div>';
+            }
+        });
+    }
+
+    const authenticateBtn = document.getElementById('authenticateCalendar');
+    if (authenticateBtn) {
+        authenticateBtn.onclick = () => {
+            const token = localStorage.getItem('token');
+            const email = localStorage.getItem('userEmail');
+            
+            if (!email) {
+                alert('No email found. Please sign in again.');
+                return;
+            }
+            
+            fetch(`/calendar-api/auth-url?email=${encodeURIComponent(email)}`, {
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.url) {
+                    window.location.href = data.url;
+                } else {
+                    alert('Failed to get authorization URL. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error connecting to Google Calendar:', error);
+                alert('Failed to connect to Google Calendar. Please check your connection and try again.');
+            });
+        };
+    }
+
+    checkCalendarAuth();
+    loadUpcomingEvents();
+    
     // --- Dashboard location edit handlers ---
     async function fetchMyProfileEmail() {
       try {
@@ -570,7 +848,10 @@
     document.getElementById('dashSaveBtn').addEventListener('click', async () => {
       const newLoc = document.getElementById('dashLocInput').value;
       const email = await fetchMyProfileEmail();
-      if (!email) { alert('Unable to determine email from token'); return; }
+      if (!email) { 
+        showToast('Unable to determine email from token', 'error');
+        return; 
+      }
       try {
         const resp = await fetch(`/admin-api/users/by-email/location?email=${encodeURIComponent(email)}`, {
           method: 'POST',
@@ -585,16 +866,384 @@
           document.getElementById('dashCancelBtn').style.display = 'none';
           document.getElementById('dashLocVal').style.display = 'inline-block';
           document.getElementById('dashLocInput').style.display = 'none';
+          showToast('Location updated successfully', 'success');
         } else {
-          alert('Failed to update location: ' + (j.error || resp.statusText));
+          showToast('Failed to update location: ' + (j.error || resp.statusText), 'error');
         }
       } catch (err) {
-        alert('Error updating location: ' + err.message);
+        showToast('Error updating location: ' + err.message, 'error');
       }
     });
 
     // load initial location value (hidden until user opens editor)
     loadDashLocation();
+
+    // Toast notification function
+    function showToast(message, type = 'info', duration = 5000) {
+      const toastContainer = document.getElementById('toastContainer');
+      const toastId = 'toast-' + Date.now();
+      
+      const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+      };
+      
+      const toastHTML = `
+        <div id="${toastId}" class="toast toast-${type}" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <strong class="me-auto">${icons[type] || icons.info} ${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            ${message}
+          </div>
+        </div>
+      `;
+      
+      toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+      
+      const toastElement = document.getElementById(toastId);
+      const toast = new bootstrap.Toast(toastElement, {
+        autohide: true,
+        delay: duration
+      });
+      
+      toast.show();
+      
+      // Remove element after it's hidden
+      toastElement.addEventListener('hidden.bs.toast', function () {
+        toastElement.remove();
+      });
+      
+      return toast;
+    }
+
+    // Load upcoming events for dashboard stats and display
+    let currentCancelEvent = null;
+    let cancelModal = null;
+    
+    // Initialize modal after DOM is ready
+    const modalElement = document.getElementById('cancelMeetingModal');
+    if (modalElement) {
+      cancelModal = new bootstrap.Modal(modalElement);
+      
+      // Reset state when modal is hidden
+      modalElement.addEventListener('hidden.bs.modal', function () {
+        currentCancelEvent = null;
+        document.getElementById('cancelReason').value = '';
+      });
+    } else {
+      console.error('Cancel meeting modal element not found');
+    }
+    
+    async function loadUpcomingEvents() {
+      if (!userEmail) {
+        console.warn('⚠️ No userEmail available for loading events');
+        safeSetText('upcomingCount', '0');
+        safeSetText('completedCount', '0');
+        document.getElementById('upcomingEventsList').innerHTML = '<div class="text-muted">No email available</div>';
+        return;
+      }
+      
+      let events = [];
+      
+      // Fetch bookings from meeting-service only (not from Google Calendar)
+      let bookings = [];
+      try {
+        const bRes = await fetch(`/booking-api/bookings?professorEmail=${userEmail}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (bRes.ok) {
+          bookings = await bRes.json();
+          
+          // Convert bookings to event format
+          const bookingEvents = (bookings || [])
+            .filter(b => b.status === 'BOOKED' && b.startIso && b.endIso)
+            .map(b => ({
+              title: b.title || 'Meeting',
+              start: b.startIso,
+              end: b.endIso,
+              description: b.description || '',
+              location: b.location || '',
+              // Use professorCalendarEventId (Google Calendar event ID) for cancellation, fallback to booking ID
+              id: b.professorCalendarEventId || b.id,
+              studentEmail: b.studentEmail,
+              studentName: b.studentName,
+              source: 'booking',
+              bookingId: b.id // Keep booking ID for reference
+            }));
+          
+          events = bookingEvents;
+          console.log('✅ Total events from bookings:', events.length);
+        } else {
+          console.warn('⚠️ Failed to fetch bookings:', bRes.status);
+        }
+      } catch (e) {
+        console.warn('⚠️ Error fetching bookings:', e);
+      }
+      
+      if (!Array.isArray(events)) {
+        events = [];
+      }
+      
+      const now = new Date();
+      const upcoming = events.filter(ev => {
+        try {
+          const start = ev.start;
+          if (!start) return false;
+          const startDate = new Date(start);
+          return startDate >= now;
+        } catch (e) {
+          return false;
+        }
+      }).sort((a, b) => new Date(a.start) - new Date(b.start));
+      
+      const completed = events.filter(ev => {
+        try {
+          const end = ev.end || ev.start;
+          if (!end) return false;
+          const endDate = new Date(end);
+          return endDate < now;
+        } catch (e) {
+          return false;
+        }
+      });
+      safeSetText('upcomingCount', upcoming.length);
+      safeSetText('completedCount', completed.length);   
+
+      // All events are from bookings, so they already have student info
+      // Display upcoming events
+      const upcomingEnriched = upcoming;
+      
+      console.log('📅 Upcoming events to display:', upcomingEnriched.length);
+      // Log event IDs and student info to debug
+      upcomingEnriched.forEach((ev, idx) => {
+        console.log(`Event ${idx + 1}:`, {
+          title: ev.title,
+          id: ev.id,
+          hasId: !!ev.id,
+          start: ev.start,
+          studentEmail: ev.studentEmail,
+          studentName: ev.studentName,
+          hasStudentInfo: !!(ev.studentEmail || ev.studentName),
+          description: ev.description ? ev.description.substring(0, 200) : 'No description'
+        });
+      });
+      
+      displayUpcomingEvents(upcomingEnriched);
+    }
+    
+    function displayUpcomingEvents(events) {
+      const container = document.getElementById('upcomingEventsList');
+      
+      if (!events || events.length === 0) {
+        container.innerHTML = '<div class="text-muted">No upcoming meetings</div>';
+        return;
+      }
+      
+      // All events are from bookings, so they already have student info from the database
+      // Sort by date
+      const sortedEvents = events.sort((a, b) => {
+        return new Date(a.start) - new Date(b.start); // Sort by date
+      });
+      
+      container.innerHTML = sortedEvents.map((event, idx) => {
+        const startDate = new Date(event.start);
+        const endDate = new Date(event.end || event.start);
+        const formattedStart = startDate.toLocaleString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        const formattedEnd = endDate.toLocaleString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        const hasStudentInfo = event.studentEmail || event.studentName;
+        const studentName = event.studentName || 'N/A';
+        const studentEmail = event.studentEmail || 'N/A';
+        // Use bookingId for cancellation (since we're only using bookings now)
+        const bookingId = event.bookingId || event.id || '';
+        const eventTitle = (event.title || 'Meeting').replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+        const safeStudentName = studentName.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+        const safeStudentEmail = studentEmail.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+        const safeStartTime = formattedStart.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+        const safeEndTime = formattedEnd.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+        
+        // Debug logging
+        if (!bookingId) {
+          console.warn('⚠️ Event missing booking ID:', event.title, event);
+        }
+        
+        // Show cancel button - use bookingId for cancellation via booking API
+        const cancelButton = bookingId ? `
+          <button class="btn btn-sm btn-danger cancel-meeting-btn" 
+                  data-booking-id="${bookingId}" 
+                  data-event-title="${eventTitle}" 
+                  data-student-name="${safeStudentName}" 
+                  data-student-email="${safeStudentEmail}" 
+                  data-start-time="${safeStartTime}" 
+                  data-end-time="${safeEndTime}"
+                  type="button"
+                  style="cursor: pointer;">
+            Cancel Meeting
+          </button>
+        ` : `
+          <button class="btn btn-sm btn-danger cancel-meeting-btn" 
+                  disabled 
+                  title="Booking ID not available - Cannot cancel this event"
+                  type="button"
+                  style="cursor: not-allowed; opacity: 0.6;">
+            Cancel Meeting
+          </button>
+        `;
+        
+        return `
+          <div class="event-card">
+            <h5 class="card-title">${event.title || 'Meeting'}</h5>
+            ${hasStudentInfo ? `
+              <div class="event-info">
+                <strong>👤 Student:</strong> ${studentName} <span class="text-muted">(${studentEmail})</span>
+              </div>
+            ` : '<div class="event-info text-muted small">No student information available</div>'}
+            <div class="event-datetime">
+              <strong>📅 Date & Time:</strong><br>
+              ${formattedStart}<br>
+              <span class="text-muted">to ${formattedEnd}</span>
+            </div>
+            ${event.description && !event.description.includes('--- ProfConnect Student Info ---') ? 
+              `<div class="text-muted small mb-2" style="font-size: 0.8rem;">${event.description.substring(0, 80).replace(/</g, '&lt;').replace(/>/g, '&gt;')}${event.description.length > 80 ? '...' : ''}</div>` : ''}
+            <div class="event-actions">
+              ${cancelButton}
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // Attach event listeners to cancel buttons (only enabled ones)
+      // Use event delegation for better performance and to handle dynamically added buttons
+      container.addEventListener('click', (e) => {
+        const btn = e.target.closest('.cancel-meeting-btn:not(:disabled)');
+        if (!btn) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const bookingId = btn.getAttribute('data-booking-id');
+        if (!bookingId || bookingId === '') {
+          showToast('This event cannot be cancelled (no booking ID available)', 'warning');
+          return;
+        }
+        
+        openCancelModal(
+          bookingId,
+          btn.getAttribute('data-event-title') || 'Meeting',
+          btn.getAttribute('data-student-name') || 'N/A',
+          btn.getAttribute('data-student-email') || 'N/A',
+          btn.getAttribute('data-start-time') || '',
+          btn.getAttribute('data-end-time') || ''
+        );
+      });
+    }
+    
+    function openCancelModal(bookingId, title, studentName, studentEmail, startTime, endTime) {
+      if (!bookingId || bookingId === '') {
+        showToast('This event cannot be cancelled (no booking ID available)', 'warning');
+        return;
+      }
+      
+      console.log('📝 Opening cancel modal for booking:', bookingId, title);
+      
+      currentCancelEvent = {
+        id: bookingId, // This is now the booking ID
+        title: title || 'Meeting',
+        studentName: studentName || 'N/A',
+        studentEmail: studentEmail || 'N/A',
+        startTime: startTime || '',
+        endTime: endTime || ''
+      };
+      
+      const studentInfo = (studentName && studentName !== 'N/A' && studentEmail && studentEmail !== 'N/A') 
+        ? `<strong>Student:</strong> ${studentName} (${studentEmail})<br>` 
+        : '<strong>Student:</strong> <span class="text-muted">Not available</span><br>';
+      
+      document.getElementById('cancelMeetingInfo').innerHTML = `
+        <strong>Meeting:</strong> ${title || 'Meeting'}<br>
+        ${studentInfo}
+        <strong>Time:</strong> ${startTime || 'N/A'} ${endTime ? '- ' + endTime : ''}
+      `;
+      document.getElementById('cancelReason').value = '';
+      
+      // Show modal
+      if (cancelModal) {
+        cancelModal.show();
+        } else {
+          console.error('Cancel modal not initialized');
+          showToast('Error: Modal not initialized. Please refresh the page.', 'error');
+        }
+    }
+    
+    
+    // Initialize confirm cancel button handler (only once)
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+    if (confirmCancelBtn && !confirmCancelBtn.hasAttribute('data-listener-attached')) {
+      confirmCancelBtn.setAttribute('data-listener-attached', 'true');
+      
+      confirmCancelBtn.addEventListener('click', async () => {
+        if (!currentCancelEvent || !currentCancelEvent.id) {
+          showToast('No event selected for cancellation', 'warning');
+          return;
+        }
+        
+        const reason = document.getElementById('cancelReason').value.trim();
+        const btn = document.getElementById('confirmCancelBtn');
+        btn.disabled = true;
+        btn.textContent = 'Cancelling...';
+        
+        try {
+          // Cancel via booking API - this will handle both database update and calendar event deletion
+          const reasonParam = reason ? `?reason=${encodeURIComponent(reason)}` : '';
+          const url = `/booking-api/bookings/${currentCancelEvent.id}${reasonParam}`;
+          
+          const res = await fetch(url, {
+            method: 'DELETE',
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          const responseData = await res.json().catch(() => ({ message: res.statusText }));
+          
+          if (res.ok) {
+            cancelModal.hide();
+            const successMessage = 'Meeting cancelled successfully. ' + 
+              (currentCancelEvent.studentEmail && currentCancelEvent.studentEmail !== 'N/A' 
+                ? 'The student has been notified and calendar events have been removed.' 
+                : 'Calendar events have been removed.');
+            showToast(successMessage, 'success', 4000);
+            loadUpcomingEvents(); // Refresh the list
+            currentCancelEvent = null;
+          } else {
+            console.error('❌ Cancel failed:', responseData);
+            showToast('Failed to cancel meeting: ' + (responseData.message || res.statusText || 'Unknown error'), 'error');
+          }
+        } catch (error) {
+          console.error('❌ Error cancelling meeting:', error);
+          showToast('Error cancelling meeting: ' + (error.message || 'Network error. Please try again.'), 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Cancel Meeting';
+        }
+      });
+    }
   </script>
 </body>
 </html>
